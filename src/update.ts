@@ -121,18 +121,4 @@ export class Update {
     }
     this.out.push(`const ${event.name}: SinonEventStub;`);
   }
-
-  typesBrowserMock(namespaces: SchemaNamespaces): void {
-    Object.keys(namespaces).forEach(name => {
-      const namespace = namespaces[name];
-      this.out.push(`${name}: ${this.typesInterfaceName(namespace.namespace)}`);
-    });
-  }
-
-  typesInterfaceName(namespaceName: string): string {
-    return namespaceName
-      .split('.')
-      .map(part => part.capitalize())
-      .join('');
-  }
 }
