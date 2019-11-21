@@ -22,16 +22,6 @@ export declare namespace browserMock {
 
 `;
 
-declare global {
-  interface String {
-    capitalize: () => string;
-  }
-}
-
-String.prototype.capitalize = function(): string {
-  return this.charAt(0).toUpperCase() + this.slice(1);
-};
-
 export class Update {
   private namespaces!: SchemaNamespaces;
   private tsconfig!: ts.TranspileOptions;
