@@ -9,7 +9,7 @@ Currently based on the Firefox version _70.0.1_ schema. Comes with an API and CL
 ## Install
 
 ```shell
-npm install sinon @types/sinon webextensions-api-mock
+npm install --save-dev sinon @types/sinon webextensions-api-mock
 ```
 
 ## Usage
