@@ -205,10 +205,16 @@ export declare namespace browserMock {
     const onInstalled: SinonEventStub;
     const onUninstalled: SinonEventStub;
   }
-  namespace contextMenus {
-    const getTargetElement: sinon.SinonStub;
-  }
   namespace menus {
+    const create: sinon.SinonStub;
+    const update: sinon.SinonStub;
+    const remove: sinon.SinonStub;
+    const removeAll: sinon.SinonStub;
+    const overrideContext: sinon.SinonStub;
+    const refresh: sinon.SinonStub;
+    const onClicked: SinonEventStub;
+    const onShown: SinonEventStub;
+    const onHidden: SinonEventStub;
     const getTargetElement: sinon.SinonStub;
   }
   namespace networkStatus {
@@ -413,6 +419,7 @@ export declare namespace browserMock {
     const onLinkClicked: SinonEventStub;
   }
   namespace userScripts {
+    const register: sinon.SinonStub;
     const onBeforeScript: SinonEventStub;
   }
   namespace webNavigation {
@@ -454,4 +461,5 @@ export declare namespace browserMock {
     const onRemoved: SinonEventStub;
     const onFocusChanged: SinonEventStub;
   }
+  const contextMenus: typeof menus;
 }

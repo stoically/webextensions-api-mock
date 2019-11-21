@@ -29,9 +29,11 @@ export class WebExtensionsApiMock {
     const browser: Browser = {
       sinonSandbox: sandbox,
     };
-    Object.values(this.namespaces).forEach(namespace => {
-      this.createNamespaceStub(sandbox, namespace, browser, aliases);
-    });
+    Object.values(this.namespaces).forEach(namespaces =>
+      namespaces.forEach(namespace =>
+        this.createNamespaceStub(sandbox, namespace, browser, aliases)
+      )
+    );
 
     aliases.forEach((to, from) => {
       browser[from] = browser[to];

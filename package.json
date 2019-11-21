@@ -38,7 +38,7 @@
   "dependencies": {
     "prettier": "^1.19.1",
     "typescript": "^3.7.2",
-    "webextensions-schema": "^0.4.0"
+    "webextensions-schema": "^0.5.0"
   },
   "peerDependencies": {
     "@types/sinon": "^7.5.1",

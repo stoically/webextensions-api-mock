@@ -28,6 +28,9 @@ export class Update {
   private prettierOptions!: prettier.Options;
   private out: string[] = [OUT_PREFIX];
   private generatedDir = path.join(__dirname, 'generated');
+  private imports: {
+    [key: string]: string;
+  }[] = [];
 
   async run(): Promise<SchemaNamespaces> {
     this.prettierOptions = JSON.parse(
@@ -57,9 +60,25 @@ export class Update {
   }
 
   async updateTypes(): Promise<void> {
-    Object.values(this.namespaces).forEach(namespace => {
-      this.typesNamespaceInterface(namespace);
+    Object.values(this.namespaces).forEach(namespaces => {
+      const outNamespaceName = namespaces[0].namespace.split('.').pop();
+      if (outNamespaceName && namespaces[0].$import) {
+        this.imports.push({
+          name: outNamespaceName,
+          import: namespaces[0].$import,
+        });
+        return;
+      }
+
+      this.out.push(`namespace ${outNamespaceName} {`);
+      namespaces.forEach(namespace => this.typesNamespaceInterface(namespace));
+      this.out.push('}');
     });
+
+    this.imports.forEach(nsImport =>
+      this.out.push(`const ${nsImport.name}: typeof ${nsImport.import};`)
+    );
+
     this.out.push('}');
 
     const types = prettier.format(this.out.join('\n'), {
@@ -72,19 +91,6 @@ export class Update {
   }
 
   typesNamespaceInterface(namespace: NamespaceSchema): void {
-    const interfaceName = namespace.namespace.split('.').pop();
-
-    if (namespace.$import) {
-      const importNamespace = this.namespaces[namespace.$import];
-      if (!importNamespace) {
-        console.log("couldn't import", namespace.$import);
-        return;
-      }
-      namespace = importNamespace;
-    }
-
-    this.out.push(`namespace ${interfaceName} {`);
-
     if (namespace.functions) {
       namespace.functions.forEach(fn => {
         this.typesInterfaceFunction(fn);
@@ -96,8 +102,6 @@ export class Update {
         this.typesInterfaceEvent(event);
       });
     }
-
-    this.out.push('}');
   }
 
   typesInterfaceFunction(fn: TypeSchema): void {
