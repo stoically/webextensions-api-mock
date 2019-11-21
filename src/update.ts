@@ -60,18 +60,11 @@ export class Update {
   }
 
   async updateTypes(): Promise<void> {
-    Object.values(this.namespaces).forEach(namespaces => {
-      const outNamespaceName = namespaces[0].namespace.split('.').pop();
-      if (outNamespaceName && namespaces[0].$import) {
-        this.imports.push({
-          name: outNamespaceName,
-          import: namespaces[0].$import,
-        });
-        return;
-      }
-
-      this.out.push(`namespace ${outNamespaceName} {`);
-      namespaces.forEach(namespace => this.typesNamespaceInterface(namespace));
+    Object.keys(this.namespaces).forEach(namespaceName => {
+      this.out.push(`namespace ${namespaceName} {`);
+      this.namespaces[namespaceName].forEach(namespace =>
+        this.typesNamespaceInterface(namespace)
+      );
       this.out.push('}');
     });
 
@@ -91,6 +84,14 @@ export class Update {
   }
 
   typesNamespaceInterface(namespace: NamespaceSchema): void {
+    if (namespace.$import) {
+      this.imports.push({
+        name: namespace.namespace,
+        import: namespace.$import,
+      });
+      return;
+    }
+
     if (namespace.functions) {
       namespace.functions.forEach(fn => {
         this.typesInterfaceFunction(fn);

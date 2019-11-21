@@ -106,18 +106,18 @@ export declare namespace browserMock {
     const onChanged: SinonEventStub;
   }
   namespace devtools {}
-  namespace inspectedWindow {
+  namespace devtools.inspectedWindow {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     const eval: sinon.SinonStub;
     const reload: sinon.SinonStub;
   }
-  namespace network {
+  namespace devtools.network {
     const getHAR: sinon.SinonStub;
     const onRequestFinished: SinonEventStub;
     const onNavigated: SinonEventStub;
   }
-  namespace panels {
+  namespace devtools.panels {
     const create: sinon.SinonStub;
     const onThemeChanged: SinonEventStub;
   }
@@ -205,6 +205,7 @@ export declare namespace browserMock {
     const onInstalled: SinonEventStub;
     const onUninstalled: SinonEventStub;
   }
+  namespace contextMenus {}
   namespace menus {
     const create: sinon.SinonStub;
     const update: sinon.SinonStub;
@@ -268,9 +269,9 @@ export declare namespace browserMock {
     const getModuleSlots: sinon.SinonStub;
   }
   namespace privacy {}
-  namespace network {}
-  namespace services {}
-  namespace websites {}
+  namespace privacy.network {}
+  namespace privacy.services {}
+  namespace privacy.websites {}
   namespace proxy {
     const register: sinon.SinonStub;
     const unregister: sinon.SinonStub;
@@ -412,7 +413,7 @@ export declare namespace browserMock {
     const onQueryCanceled: SinonEventStub;
     const onResultsRequested: SinonEventStub;
   }
-  namespace contextualTip {
+  namespace urlbar.contextualTip {
     const set: sinon.SinonStub;
     const remove: sinon.SinonStub;
     const onButtonClicked: SinonEventStub;
