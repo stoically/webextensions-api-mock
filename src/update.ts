@@ -8,34 +8,49 @@ import webExtensionsSchema, {
 import prettier from 'prettier';
 
 const OUT_PREFIX = `
-/* eslint-disable @typescript-eslint/class-name-casing */
-/// <reference types="sinon"/>
+import sinon from 'sinon';
 
-export declare namespace browserMock {
-  const sinonSandbox: sinon.SinonSandbox;
-  interface SinonEventStub {
-    addListener: sinon.SinonStub;
-    removeListener: sinon.SinonStub;
-    hasListener: sinon.SinonStub;
-  }
+export interface SinonEventStub {
+  addListener: sinon.SinonStub;
+  removeListener: sinon.SinonStub;
+  hasListener: sinon.SinonStub;
+}
 
 `;
 
+declare global {
+  interface String {
+    capitalize: () => string;
+  }
+}
+
+String.prototype.capitalize = function(): string {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+type OutInterface = Map<string, string>;
+
 export class Update {
   private namespaces!: SchemaNamespaces;
-  private prettierOptions!: prettier.Options;
+  private prettierOptions: prettier.Options = {};
   private out: string[] = [OUT_PREFIX];
+  private outNamespaces: Map<string, OutInterface> = new Map();
+  private outBrowser: Map<string, string> = new Map([
+    ['sinonSandbox', 'sinon.SinonSandbox;'],
+  ]);
   private generatedDir = path.join(__dirname, 'generated');
   private imports: {
     [key: string]: string;
   }[] = [];
 
   async run(): Promise<SchemaNamespaces> {
-    this.prettierOptions = JSON.parse(
-      (await fs.readFile(path.join(__dirname, '..', 'package.json'))).toString()
-    ).prettier;
     const schema = await webExtensionsSchema();
     console.log(`[webextensions-api-mock] updating to ${schema.tag()}`);
+
+    const options = await prettier.resolveConfig('.');
+    if (options) {
+      this.prettierOptions = options;
+    }
 
     this.namespaces = schema.namespaces();
     await Promise.all([this.updateSchema(), this.updateTypes()]);
@@ -54,18 +69,35 @@ export class Update {
 
   async updateTypes(): Promise<void> {
     Object.keys(this.namespaces).forEach(namespaceName => {
-      this.out.push(`namespace ${namespaceName} {`);
       this.namespaces[namespaceName].forEach(namespace =>
         this.typesNamespaceInterface(namespace)
       );
-      this.out.push('}');
+    });
+
+    this.out.push(`export interface BrowserMock {`);
+    this.outBrowser.forEach((value, key) => {
+      this.out.push(`${key}: ${value}`);
+    });
+    this.out.push(`}\n`);
+
+    this.outNamespaces.forEach((outInterface, interfaceName) => {
+      this.out.push(`export interface ${interfaceName} {`);
+      outInterface.forEach((value, key) => {
+        if ([value, key].includes('eval')) {
+          this.out.push(
+            '// eslint-disable-next-line @typescript-eslint/ban-ts-ignore'
+          );
+          this.out.push('// @ts-ignore');
+        }
+
+        this.out.push(`${key}: ${value}`);
+      });
+      this.out.push(`}\n`);
     });
 
     this.imports.forEach(nsImport =>
-      this.out.push(`const ${nsImport.name}: typeof ${nsImport.import};`)
+      this.out.push(`export type ${nsImport.name} = ${nsImport.import};`)
     );
-
-    this.out.push('}');
 
     const types = prettier.format(this.out.join('\n'), {
       ...this.prettierOptions,
@@ -75,46 +107,64 @@ export class Update {
   }
 
   typesNamespaceInterface(namespace: NamespaceSchema): void {
+    const nameSplits = namespace.namespace.split('.');
+    if (!this.outBrowser.has(nameSplits[0])) {
+      this.outBrowser.set(nameSplits[0], nameSplits[0].capitalize());
+    }
+
+    const interfaceName = nameSplits.map(name => name.capitalize()).join('');
+    let outInterface = this.outNamespaces.get(interfaceName);
+    if (!outInterface) {
+      outInterface = new Map();
+      this.outNamespaces.set(interfaceName, outInterface);
+    }
+
+    if (nameSplits.length > 1) {
+      let lastName = '';
+      nameSplits.forEach((nameSplit, index) => {
+        if (index > 0) {
+          const outInterface = this.outNamespaces.get(lastName);
+          outInterface?.set(nameSplit, lastName + nameSplit.capitalize());
+        }
+        lastName += nameSplit.capitalize();
+      });
+    }
+
     if (namespace.$import) {
       this.imports.push({
         name: namespace.namespace,
-        import: namespace.$import,
+        import: namespace.$import.capitalize(),
       });
       return;
     }
 
     if (namespace.functions) {
       namespace.functions.forEach(fn => {
-        this.typesInterfaceFunction(fn);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.typesInterfaceFunction(outInterface!, fn);
       });
     }
 
     if (namespace.events) {
       namespace.events.forEach(event => {
-        this.typesInterfaceEvent(event);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        this.typesInterfaceEvent(outInterface!, event);
       });
     }
   }
 
-  typesInterfaceFunction(fn: TypeSchema): void {
+  typesInterfaceFunction(outInterface: OutInterface, fn: TypeSchema): void {
     if (!fn.name || fn.type !== 'function' || fn.unsupported) {
       return;
     }
 
-    if (fn.name === 'eval') {
-      this.out.push(
-        '// eslint-disable-next-line @typescript-eslint/ban-ts-ignore'
-      );
-      this.out.push('// @ts-ignore');
-    }
-
-    this.out.push(`const ${fn.name}: sinon.SinonStub;`);
+    outInterface.set(fn.name, 'sinon.SinonStub');
   }
 
-  typesInterfaceEvent(event: TypeSchema): void {
+  typesInterfaceEvent(outInterface: OutInterface, event: TypeSchema): void {
     if (!event.name || event.type !== 'function' || event.unsupported) {
       return;
     }
-    this.out.push(`const ${event.name}: SinonEventStub;`);
+    outInterface.set(event.name, 'SinonEventStub');
   }
 }

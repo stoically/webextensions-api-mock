@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import sinon from 'sinon';
-import { browserMock } from './generated/types';
 import { SchemaNamespaces, NamespaceSchema } from 'webextensions-schema';
 import { Update } from './update';
+import { BrowserMock } from './generated/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Browser = any;
@@ -19,7 +19,7 @@ export class WebExtensionsApiMock {
     );
   }
 
-  createBrowserStub(): typeof browserMock {
+  createBrowserStub(): BrowserMock {
     if (!this.namespaces) {
       this.namespaces = this.readSchema();
     }
@@ -83,7 +83,8 @@ export class WebExtensionsApiMock {
 }
 
 const mock = new WebExtensionsApiMock();
-const webExtensionsApiMock = (): typeof browserMock => mock.createBrowserStub();
+const webExtensionsApiMock = (): BrowserMock => mock.createBrowserStub();
 
 export default webExtensionsApiMock;
 export const update = mock.update;
+export * from './generated/types';
