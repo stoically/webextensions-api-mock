@@ -180,7 +180,6 @@ export interface Devtools {
 }
 
 export interface DevtoolsInspectedWindow {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   eval: sinon.SinonStub;
   reload: sinon.SinonStub;

@@ -18,16 +18,6 @@ export interface SinonEventStub {
 
 `;
 
-declare global {
-  interface String {
-    capitalize: () => string;
-  }
-}
-
-String.prototype.capitalize = function(): string {
-  return this.charAt(0).toUpperCase() + this.slice(1);
-};
-
 type OutInterface = Map<string, string>;
 
 export class Update {
@@ -57,7 +47,7 @@ export class Update {
     return this.namespaces;
   }
 
-  async updateSchema(): Promise<void> {
+  private async updateSchema(): Promise<void> {
     await fs.writeFile(
       path.join(this.generatedDir, 'schema.json'),
       prettier.format(JSON.stringify(this.namespaces), {
@@ -67,7 +57,7 @@ export class Update {
     );
   }
 
-  async updateTypes(): Promise<void> {
+  private async updateTypes(): Promise<void> {
     Object.keys(this.namespaces).forEach(namespaceName => {
       this.namespaces[namespaceName].forEach(namespace =>
         this.typesNamespaceInterface(namespace)
@@ -84,9 +74,6 @@ export class Update {
       this.out.push(`export interface ${interfaceName} {`);
       outInterface.forEach((value, key) => {
         if ([value, key].includes('eval')) {
-          this.out.push(
-            '// eslint-disable-next-line @typescript-eslint/ban-ts-ignore'
-          );
           this.out.push('// @ts-ignore');
         }
 
@@ -106,13 +93,15 @@ export class Update {
     await fs.writeFile(path.join(this.generatedDir, 'types.d.ts'), types);
   }
 
-  typesNamespaceInterface(namespace: NamespaceSchema): void {
+  private typesNamespaceInterface(namespace: NamespaceSchema): void {
     const nameSplits = namespace.namespace.split('.');
     if (!this.outBrowser.has(nameSplits[0])) {
-      this.outBrowser.set(nameSplits[0], nameSplits[0].capitalize());
+      this.outBrowser.set(nameSplits[0], this.capitalize(nameSplits[0]));
     }
 
-    const interfaceName = nameSplits.map(name => name.capitalize()).join('');
+    const interfaceName = nameSplits
+      .map(name => this.capitalize(name))
+      .join('');
     let outInterface = this.outNamespaces.get(interfaceName);
     if (!outInterface) {
       outInterface = new Map();
@@ -124,16 +113,16 @@ export class Update {
       nameSplits.forEach((nameSplit, index) => {
         if (index > 0) {
           const outInterface = this.outNamespaces.get(lastName);
-          outInterface?.set(nameSplit, lastName + nameSplit.capitalize());
+          outInterface?.set(nameSplit, lastName + this.capitalize(nameSplit));
         }
-        lastName += nameSplit.capitalize();
+        lastName += this.capitalize(nameSplit);
       });
     }
 
     if (namespace.$import) {
       this.imports.push({
         name: namespace.namespace,
-        import: namespace.$import.capitalize(),
+        import: this.capitalize(namespace.$import),
       });
       return;
     }
@@ -153,7 +142,10 @@ export class Update {
     }
   }
 
-  typesInterfaceFunction(outInterface: OutInterface, fn: TypeSchema): void {
+  private typesInterfaceFunction(
+    outInterface: OutInterface,
+    fn: TypeSchema
+  ): void {
     if (!fn.name || fn.type !== 'function' || fn.unsupported) {
       return;
     }
@@ -161,10 +153,17 @@ export class Update {
     outInterface.set(fn.name, 'sinon.SinonStub');
   }
 
-  typesInterfaceEvent(outInterface: OutInterface, event: TypeSchema): void {
+  private typesInterfaceEvent(
+    outInterface: OutInterface,
+    event: TypeSchema
+  ): void {
     if (!event.name || event.type !== 'function' || event.unsupported) {
       return;
     }
     outInterface.set(event.name, 'SinonEventStub');
+  }
+
+  private capitalize(string: string): string {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 }
