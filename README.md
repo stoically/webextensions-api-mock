@@ -2,7 +2,7 @@
 
 Automatically generated [`sinon stubs`](https://sinonjs.org/releases/latest/stubs/), together with types, for the [WebExtensions API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API).
 
-Currently based on the Firefox version _70.0.1_ schema. Comes with an API and CLI that lets you update the schema and types to the _latest stable version_, thanks to [`webextensions-schema`](https://github.com/stoically/webextensions-schema).
+Currently based on the Firefox version _70.0.1_ schema. Comes with an API and CLI that lets you update the schema and types to the _latest stable Firefox version_, thanks to [`webextensions-schema`](https://github.com/stoically/webextensions-schema).
 
 **Important**: `sinon` is a peer dependency, so you have to install it and its @types yourself. That's because it can otherwise lead to unexpected assertion behavior when sinon does `instanceof` checks internally. It also allows to upgrade sinon without the need to bump the version in `webextensions-api-mock`.
 
