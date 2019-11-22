@@ -293,8 +293,6 @@ export interface Management {
   onUninstalled: SinonEventStub;
 }
 
-export interface ContextMenus {}
-
 export interface Menus {
   create: sinon.SinonStub;
   update: sinon.SinonStub;
@@ -586,4 +584,4 @@ export interface Windows {
   onFocusChanged: SinonEventStub;
 }
 
-export type contextMenus = Menus;
+export type ContextMenus = Menus;

@@ -99,6 +99,14 @@ export class Update {
       this.outBrowser.set(nameSplits[0], this.capitalize(nameSplits[0]));
     }
 
+    if (namespace.$import) {
+      this.imports.push({
+        name: this.capitalize(namespace.namespace),
+        import: this.capitalize(namespace.$import),
+      });
+      return;
+    }
+
     const interfaceName = nameSplits
       .map(name => this.capitalize(name))
       .join('');
@@ -117,14 +125,6 @@ export class Update {
         }
         lastName += this.capitalize(nameSplit);
       });
-    }
-
-    if (namespace.$import) {
-      this.imports.push({
-        name: namespace.namespace,
-        import: this.capitalize(namespace.$import),
-      });
-      return;
     }
 
     if (namespace.functions) {
