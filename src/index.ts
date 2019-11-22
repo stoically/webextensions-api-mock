@@ -56,7 +56,7 @@ export class WebExtensionsApiMock {
     browser[namespace.namespace] = {};
     if (namespace.events) {
       namespace.events.forEach(event => {
-        if (!event.name || event.type !== 'function') {
+        if (!event.name || event.type !== 'function' || event.unsupported) {
           return;
         }
         browser[namespace.namespace][event.name] = {
@@ -69,7 +69,7 @@ export class WebExtensionsApiMock {
 
     if (namespace.functions) {
       namespace.functions.forEach(fn => {
-        if (!fn.name || fn.type !== 'function') {
+        if (!fn.name || fn.type !== 'function' || fn.unsupported) {
           return;
         }
         browser[namespace.namespace][fn.name] = sandbox.stub();
