@@ -1,6 +1,5 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import ts from 'typescript';
 import webExtensionsSchema, {
   SchemaNamespaces,
   TypeSchema,
@@ -24,7 +23,6 @@ export declare namespace browserMock {
 
 export class Update {
   private namespaces!: SchemaNamespaces;
-  private tsconfig!: ts.TranspileOptions;
   private prettierOptions!: prettier.Options;
   private out: string[] = [OUT_PREFIX];
   private generatedDir = path.join(__dirname, 'generated');
@@ -36,11 +34,6 @@ export class Update {
     this.prettierOptions = JSON.parse(
       (await fs.readFile(path.join(__dirname, '..', 'package.json'))).toString()
     ).prettier;
-    this.tsconfig = JSON.parse(
-      (
-        await fs.readFile(path.join(__dirname, '..', 'tsconfig.build.json'))
-      ).toString()
-    );
     const schema = await webExtensionsSchema();
     console.log(`[webextensions-api-mock] updating to ${schema.tag()}`);
 
@@ -78,9 +71,7 @@ export class Update {
       ...this.prettierOptions,
       parser: 'typescript',
     });
-    const js = ts.transpileModule(types, this.tsconfig);
     await fs.writeFile(path.join(this.generatedDir, 'types.d.ts'), types);
-    await fs.writeFile(path.join(this.generatedDir, 'types.js'), js.outputText);
   }
 
   typesNamespaceInterface(namespace: NamespaceSchema): void {
