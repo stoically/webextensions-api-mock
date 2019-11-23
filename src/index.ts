@@ -6,18 +6,10 @@ import { Update } from './update';
 import { BrowserMock } from './generated/types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Browser = any;
+type BrowserOut = any;
 
 export class WebExtensionsApiMock {
   public namespaces?: SchemaNamespaces;
-
-  readSchema(): SchemaNamespaces {
-    return JSON.parse(
-      fs
-        .readFileSync(path.join(__dirname, 'generated', 'schema.json'))
-        .toString()
-    );
-  }
 
   createBrowserStub(): BrowserMock {
     if (!this.namespaces) {
@@ -26,7 +18,7 @@ export class WebExtensionsApiMock {
 
     const sandbox = sinon.createSandbox();
     const aliases = new Map();
-    const browser: Browser = {
+    const browser: BrowserOut = {
       sinonSandbox: sandbox,
     };
     Object.values(this.namespaces).forEach(namespaces =>
@@ -42,10 +34,18 @@ export class WebExtensionsApiMock {
     return browser;
   }
 
+  readSchema(): SchemaNamespaces {
+    return JSON.parse(
+      fs
+        .readFileSync(path.join(__dirname, 'generated', 'schema.json'))
+        .toString()
+    );
+  }
+
   createNamespaceStub(
     sandbox: sinon.SinonSandbox,
     namespace: NamespaceSchema,
-    browser: Browser,
+    browser: BrowserOut,
     aliases: Map<string, string>
   ): void {
     if (namespace.$import) {
