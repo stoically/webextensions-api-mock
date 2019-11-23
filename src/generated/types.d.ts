@@ -776,6 +776,7 @@ export interface Menus {
     button?: number;
     targetElementId?: number;
   };
+  ACTION_MENU_TOP_LEVEL_LIMIT: 6;
   getTargetElement: sinon.SinonStub;
 }
 
@@ -1098,6 +1099,7 @@ export interface Sessions {
     info: string;
     deviceName: string;
   };
+  MAX_SESSION_RESULTS: 25;
 }
 
 export interface SidebarAction {
@@ -1231,6 +1233,7 @@ export interface Tabs {
     tabId?: number;
     windowId?: number;
   };
+  TAB_ID_NONE: -1;
 }
 
 export type TabsMutedInfoReason = 'user' | 'capture' | 'extension';
@@ -1491,6 +1494,7 @@ export interface WebRequest {
   };
   UrlClassificationFlags: WebRequestUrlClassificationFlags[];
   UrlClassification: {};
+  MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: 20;
 }
 
 export type WebRequestResourceType =
@@ -1588,6 +1592,8 @@ export interface Windows {
   GetInfo: {
     populate?: boolean;
   };
+  WINDOW_ID_NONE: -1;
+  WINDOW_ID_CURRENT: -2;
 }
 
 export type WindowsWindowType =

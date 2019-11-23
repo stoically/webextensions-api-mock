@@ -73,11 +73,7 @@ export class TypeSchemaGenerator {
 
     if (typeSchema.type === 'string') {
       this.out.parent.push(
-        `${this.name}: ${this.string(
-          this.name,
-          !!typeSchema.optional,
-          typeSchema.enum
-        )};`
+        `${this.name}: ${this.string(this.name, typeSchema.enum)};`
       );
     }
 
@@ -93,6 +89,10 @@ export class TypeSchemaGenerator {
 
     if (typeSchema.type === 'object') {
       this.object(typeSchema);
+    }
+
+    if (typeSchema.value) {
+      this.out.parent.push(`${typeSchema.name}: ${typeSchema.value};`);
     }
   }
 
@@ -136,8 +136,8 @@ export class TypeSchemaGenerator {
     return `${event.name}: SinonEventStub;`;
   }
 
-  private string(name: string, optional: boolean, enums?: Enum[]): string {
-    return enums ? this.enum(name, optional, enums) : 'string[]';
+  private string(name: string, enums?: Enum[]): string {
+    return enums ? this.enum(name, enums) : 'string[]';
   }
 
   private objectProperty(
@@ -157,7 +157,6 @@ export class TypeSchemaGenerator {
       out.push(
         `${this.key(propertyName, property.optional)} ${this.string(
           propertyName,
-          !!property.optional,
           property.items.enum
         )};`
       );
@@ -168,7 +167,7 @@ export class TypeSchemaGenerator {
     return `${name}${optional ? '?' : ''}:`;
   }
 
-  private enum(name: string, optional: boolean, enums: Enum[]): string {
+  private enum(name: string, enums: Enum[]): string {
     const childName = `${this.interfaceName}${capitalize(name)}`;
 
     this.out.childTypes.push(
