@@ -75,6 +75,17 @@ export class WebExtensionsApiMock {
         browser[namespace.namespace][fn.name] = sandbox.stub();
       });
     }
+
+    if (namespace.properties) {
+      Object.keys(namespace.properties).forEach(propertyName => {
+        if (!namespace.properties) return;
+
+        const property = namespace.properties[propertyName];
+        if (property.value) {
+          browser[namespace.namespace][propertyName] = property.value;
+        }
+      });
+    }
   }
 
   update = async (): Promise<void> => {
