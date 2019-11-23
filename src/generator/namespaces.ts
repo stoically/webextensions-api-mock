@@ -83,6 +83,9 @@ export class NamespacesGenerator {
       out.push(`export interface ${interfaceName} {`);
       outInterface.parent.forEach(value => {
         if (value.startsWith('eval:')) {
+          out.push(
+            '// eslint-disable-next-line @typescript-eslint/ban-ts-ignore'
+          );
           out.push('// @ts-ignore');
         }
 

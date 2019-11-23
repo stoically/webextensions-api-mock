@@ -66,7 +66,9 @@ export interface BrowserMock {
 
 export interface Manifest {
   KeyName: string[];
-  ProtocolHandler: { name: string };
+  ProtocolHandler: {
+    name: string;
+  };
   ManifestBase: {
     manifest_version: number;
     name: string;
@@ -84,9 +86,16 @@ export interface Manifest {
     web_accessible_resources?: string[];
     hidden?: boolean;
   };
-  WebExtensionLangpackManifest: { homepage_url?: string; langpack_id: string };
-  WebExtensionDictionaryManifest: { homepage_url?: string };
-  ThemeIcons: { size: number };
+  WebExtensionLangpackManifest: {
+    homepage_url?: string;
+    langpack_id: string;
+  };
+  WebExtensionDictionaryManifest: {
+    homepage_url?: string;
+  };
+  ThemeIcons: {
+    size: number;
+  };
   HttpURL: string[];
   ExtensionURL: string[];
   ExtensionFileUrl: string[];
@@ -105,7 +114,9 @@ export interface Manifest {
   ImageData: {};
   ThemeExperiment: {};
   ThemeType: {};
-  ThemeManifest: { default_locale?: string };
+  ThemeManifest: {
+    default_locale?: string;
+  };
 }
 
 export interface ActivityLog {
@@ -119,7 +130,9 @@ export interface Alarms {
   clear: sinon.SinonStub;
   clearAll: sinon.SinonStub;
   onAlarm: SinonEventStub;
-  Alarm: { name: string };
+  Alarm: {
+    name: string;
+  };
 }
 
 export interface Bookmarks {
@@ -176,7 +189,10 @@ export interface BrowserAction {
   isEnabled: sinon.SinonStub;
   openPopup: sinon.SinonStub;
   onClicked: SinonEventStub;
-  Details: { tabId?: number; windowId?: number };
+  Details: {
+    tabId?: number;
+    windowId?: number;
+  };
   ImageDataType: {};
 }
 
@@ -214,7 +230,9 @@ export interface BrowsingData {
   removeLocalStorage: sinon.SinonStub;
   removePluginData: sinon.SinonStub;
   removePasswords: sinon.SinonStub;
-  RemovalOptions: { hostnames?: string[] };
+  RemovalOptions: {
+    hostnames?: string[];
+  };
   DataTypeSet: {
     cache?: boolean;
     cookies?: boolean;
@@ -246,7 +264,11 @@ export interface Commands {
   reset: sinon.SinonStub;
   getAll: sinon.SinonStub;
   onCommand: SinonEventStub;
-  Command: { name?: string; description?: string; shortcut?: string };
+  Command: {
+    name?: string;
+    description?: string;
+    shortcut?: string;
+  };
 }
 
 export interface ContentScripts {
@@ -257,7 +279,9 @@ export interface ContentScripts {
     allFrames?: boolean;
     matchAboutBlank?: boolean;
   };
-  RegisteredContentScript: { unregister: sinon.SinonStub };
+  RegisteredContentScript: {
+    unregister: sinon.SinonStub;
+  };
 }
 
 export interface ContextualIdentities {
@@ -299,7 +323,10 @@ export interface Cookies {
     storeId: string;
     firstPartyDomain: string;
   };
-  CookieStore: { id: string; incognito: boolean };
+  CookieStore: {
+    id: string;
+    incognito: boolean;
+  };
   OnChangedCause: CookiesOnChangedCause[];
 }
 
@@ -319,17 +346,22 @@ export interface Devtools {
 }
 
 export interface DevtoolsInspectedWindow {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   eval: sinon.SinonStub;
   reload: sinon.SinonStub;
-  Resource: { url: string };
+  Resource: {
+    url: string;
+  };
 }
 
 export interface DevtoolsNetwork {
   getHAR: sinon.SinonStub;
   onRequestFinished: SinonEventStub;
   onNavigated: SinonEventStub;
-  Request: { getContent: sinon.SinonStub };
+  Request: {
+    getContent: sinon.SinonStub;
+  };
 }
 
 export interface DevtoolsPanels {
@@ -340,7 +372,10 @@ export interface DevtoolsPanels {
     onSelectionChanged: SinonEventStub;
   };
   SourcesPanel: {};
-  ExtensionPanel: { onShown: SinonEventStub; onHidden: SinonEventStub };
+  ExtensionPanel: {
+    onShown: SinonEventStub;
+    onHidden: SinonEventStub;
+  };
   ExtensionSidebarPane: {
     setExpression: sinon.SinonStub;
     setObject: sinon.SinonStub;
@@ -356,7 +391,11 @@ export interface DevtoolsPanels {
 
 export interface Dns {
   resolve: sinon.SinonStub;
-  DNSRecord: { canonicalName?: string; isTRR: string; addresses: string[] };
+  DNSRecord: {
+    canonicalName?: string;
+    isTRR: string;
+    addresses: string[];
+  };
 }
 
 export interface Downloads {
@@ -394,9 +433,15 @@ export interface Downloads {
     byExtensionId?: string;
     byExtensionName?: string;
   };
-  StringDelta: { current?: string; previous?: string };
+  StringDelta: {
+    current?: string;
+    previous?: string;
+  };
   DoubleDelta: {};
-  BooleanDelta: { current?: boolean; previous?: boolean };
+  BooleanDelta: {
+    current?: boolean;
+    previous?: boolean;
+  };
   DownloadQuery: {
     query?: string[];
     filenameRegex?: string;
@@ -458,7 +503,11 @@ export type DownloadsDangerType =
 export type DownloadsState = 'in_progress' | 'interrupted' | 'complete';
 
 export interface Events {
-  Rule: { id?: string; tags?: string[]; priority?: number };
+  Rule: {
+    id?: string;
+    tags?: string[];
+    priority?: number;
+  };
   Event: {
     addListener: sinon.SinonStub;
     removeListener: sinon.SinonStub;
@@ -515,14 +564,18 @@ export interface Extension {
   isAllowedIncognitoAccess: sinon.SinonStub;
   isAllowedFileSchemeAccess: sinon.SinonStub;
   ViewType: ExtensionViewType[];
-  lastError: { message: string };
+  lastError: {
+    message: string;
+  };
 }
 
 export type ExtensionViewType = 'tab' | 'popup' | 'sidebar';
 
 export interface ExtensionTypes {
   ImageFormat: ExtensionTypesImageFormat[];
-  ImageDetails: { quality?: number };
+  ImageDetails: {
+    quality?: number;
+  };
   RunAt: ExtensionTypesRunAt[];
   CSSOrigin: ExtensionTypesCSSOrigin[];
   InjectDetails: {
@@ -601,7 +654,11 @@ export interface History {
     visitCount?: number;
     typedCount?: number;
   };
-  VisitItem: { id: string; visitId: string; referringVisitId: string };
+  VisitItem: {
+    id: string;
+    visitId: string;
+    referringVisitId: string;
+  };
 }
 
 export type HistoryTransitionType =
@@ -628,7 +685,9 @@ export interface I18n {
 export interface Identity {
   launchWebAuthFlow: sinon.SinonStub;
   getRedirectURL: sinon.SinonStub;
-  AccountInfo: { id: string };
+  AccountInfo: {
+    id: string;
+  };
 }
 
 export interface Idle {
@@ -651,7 +710,10 @@ export interface Management {
   onEnabled: SinonEventStub;
   onInstalled: SinonEventStub;
   onUninstalled: SinonEventStub;
-  IconInfo: { size: number; url: string };
+  IconInfo: {
+    size: number;
+    url: string;
+  };
   ExtensionDisabledReason: ManagementExtensionDisabledReason[];
   ExtensionType: ManagementExtensionType[];
   ExtensionInstallType: ManagementExtensionInstallType[];
@@ -741,7 +803,11 @@ export type MenusModifiers = 'Shift' | 'Alt' | 'Command' | 'Ctrl' | 'MacCtrl';
 export interface NetworkStatus {
   getLinkInfo: sinon.SinonStub;
   onConnectionChanged: SinonEventStub;
-  NetworkLinkInfo: { status: string; type: string; id?: string };
+  NetworkLinkInfo: {
+    status: string;
+    type: string;
+    id?: string;
+  };
 }
 
 export interface NormandyAddonStudy {
@@ -775,7 +841,10 @@ export interface Notifications {
   onShown: SinonEventStub;
   TemplateType: NotificationsTemplateType[];
   PermissionLevel: NotificationsPermissionLevel[];
-  NotificationItem: { title: string; message: string };
+  NotificationItem: {
+    title: string;
+    message: string;
+  };
   CreateNotificationOptions: {
     iconUrl?: string;
     appIconMaskUrl?: string;
@@ -812,8 +881,13 @@ export interface Omnibox {
   onInputCancelled: SinonEventStub;
   DescriptionStyleType: OmniboxDescriptionStyleType[];
   OnInputEnteredDisposition: OmniboxOnInputEnteredDisposition[];
-  SuggestResult: { content: string; description: string };
-  DefaultSuggestResult: { description: string };
+  SuggestResult: {
+    content: string;
+    description: string;
+  };
+  DefaultSuggestResult: {
+    description: string;
+  };
 }
 
 export type OmniboxDescriptionStyleType = 'url' | 'match' | 'dim';
@@ -879,7 +953,10 @@ export interface PrivacyServices {
 
 export interface PrivacyWebsites {
   TrackingProtectionModeOption: PrivacyWebsitesTrackingProtectionModeOption[];
-  CookieConfig: { behavior?: string; nonPersistentCookies?: boolean };
+  CookieConfig: {
+    behavior?: string;
+    nonPersistentCookies?: boolean;
+  };
   thirdPartyCookiesAllowed: Types['Setting'];
   hyperlinkAuditingEnabled: Types['Setting'];
   referrersEnabled: Types['Setting'];
@@ -938,7 +1015,9 @@ export interface Runtime {
   onConnectExternal: SinonEventStub;
   onMessage: SinonEventStub;
   onMessageExternal: SinonEventStub;
-  Port: { name: string };
+  Port: {
+    name: string;
+  };
   MessageSender: {
     frameId?: number;
     id?: string;
@@ -957,7 +1036,9 @@ export interface Runtime {
   RequestUpdateCheckStatus: RuntimeRequestUpdateCheckStatus[];
   OnInstalledReason: RuntimeOnInstalledReason[];
   OnRestartRequiredReason: RuntimeOnRestartRequiredReason[];
-  lastError: { message?: string };
+  lastError: {
+    message?: string;
+  };
   id: string[];
 }
 
@@ -1006,9 +1087,16 @@ export interface Sessions {
   getWindowValue: sinon.SinonStub;
   removeWindowValue: sinon.SinonStub;
   onChanged: SinonEventStub;
-  Filter: { maxResults?: number };
-  Session: { lastModified: number };
-  Device: { info: string; deviceName: string };
+  Filter: {
+    maxResults?: number;
+  };
+  Session: {
+    lastModified: number;
+  };
+  Device: {
+    info: string;
+    deviceName: string;
+  };
 }
 
 export interface SidebarAction {
@@ -1025,7 +1113,12 @@ export interface SidebarAction {
 
 export interface Storage {
   onChanged: SinonEventStub;
-  StorageChange: { oldValue?: any; newValue?: any };
+  StorageChange: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    oldValue?: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    newValue?: any;
+  };
   StorageArea: {
     get: sinon.SinonStub;
     set: sinon.SinonStub;
@@ -1079,8 +1172,15 @@ export interface Tabs {
   onReplaced: SinonEventStub;
   onZoomChange: SinonEventStub;
   MutedInfoReason: TabsMutedInfoReason[];
-  MutedInfo: { muted: boolean; extensionId?: string };
-  SharingState: { screen?: string; camera: boolean; microphone: boolean };
+  MutedInfo: {
+    muted: boolean;
+    extensionId?: string;
+  };
+  SharingState: {
+    screen?: string;
+    camera: boolean;
+    microphone: boolean;
+  };
   Tab: {
     id?: number;
     index: number;
@@ -1127,7 +1227,11 @@ export interface Tabs {
   TabStatus: TabsTabStatus[];
   WindowType: TabsWindowType[];
   UpdatePropertyName: TabsUpdatePropertyName[];
-  UpdateFilter: { urls?: string[]; tabId?: number; windowId?: number };
+  UpdateFilter: {
+    urls?: string[];
+    tabId?: number;
+    windowId?: number;
+  };
 }
 
 export type TabsMutedInfoReason = 'user' | 'capture' | 'extension';
@@ -1201,7 +1305,9 @@ export interface Theme {
   update: sinon.SinonStub;
   reset: sinon.SinonStub;
   onUpdated: SinonEventStub;
-  ThemeUpdateInfo: { windowId?: number };
+  ThemeUpdateInfo: {
+    windowId?: number;
+  };
 }
 
 export interface TopSites {
@@ -1240,7 +1346,11 @@ export interface Urlbar {
   onBehaviorRequested: SinonEventStub;
   onQueryCanceled: SinonEventStub;
   onResultsRequested: SinonEventStub;
-  Query: { isPrivate: boolean; maxResults: number; searchString: string };
+  Query: {
+    isPrivate: boolean;
+    maxResults: number;
+    searchString: string;
+  };
   Result: {};
   ResultType: UrlbarResultType[];
   SourceType: UrlbarSourceType[];
@@ -1264,7 +1374,11 @@ export interface UrlbarContextualTip {
   remove: sinon.SinonStub;
   onButtonClicked: SinonEventStub;
   onLinkClicked: SinonEventStub;
-  ContextualTip: { title: string; buttonTitle?: string; linkTitle?: string };
+  ContextualTip: {
+    title: string;
+    buttonTitle?: string;
+    linkTitle?: string;
+  };
 }
 
 export interface UserScripts {
@@ -1275,7 +1389,9 @@ export interface UserScripts {
     allFrames?: boolean;
     matchAboutBlank?: boolean;
   };
-  RegisteredUserScript: { unregister: sinon.SinonStub };
+  RegisteredUserScript: {
+    unregister: sinon.SinonStub;
+  };
   onBeforeScript: SinonEventStub;
 }
 
@@ -1370,7 +1486,11 @@ export interface WebRequest {
     hsts?: boolean;
     hpkp?: string;
   };
-  UploadData: { bytes?: any; file?: string };
+  UploadData: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    bytes?: any;
+    file?: string;
+  };
   UrlClassificationFlags: WebRequestUrlClassificationFlags[];
   UrlClassification: {};
 }
@@ -1467,7 +1587,9 @@ export interface Windows {
     title?: string;
   };
   CreateType: WindowsCreateType[];
-  GetInfo: { populate?: boolean };
+  GetInfo: {
+    populate?: boolean;
+  };
 }
 
 export type WindowsWindowType =

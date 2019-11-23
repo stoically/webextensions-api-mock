@@ -123,7 +123,7 @@ export class TypeSchemaGenerator {
     }
 
     out.push('}');
-    this.out.parent.push(`${this.name}: ${out.join(' ')};`);
+    this.out.parent.push(`${this.name}: ${out.join('\n')};`);
   }
 
   private fn(fn: TypeSchema): string | false {
@@ -150,6 +150,11 @@ export class TypeSchemaGenerator {
       ['string', 'boolean', 'integer', 'any'].includes(property.type)
     ) {
       const type = property.type === 'integer' ? 'number' : property.type;
+      if (property.type === 'any') {
+        out.push(
+          '// eslint-disable-next-line @typescript-eslint/no-explicit-any'
+        );
+      }
       out.push(`${this.key(propertyName, property.optional)} ${type};`);
     }
 
