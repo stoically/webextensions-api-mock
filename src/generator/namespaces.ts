@@ -3,6 +3,8 @@ import { SchemaNamespaces, NamespaceSchema } from 'webextensions-schema';
 import { capitalize } from './helper';
 
 const OUT_PREFIX = `
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import sinon from 'sinon';
 
 export interface SinonEventStub {
@@ -83,9 +85,6 @@ export class NamespacesGenerator {
       out.push(`export interface ${interfaceName} {`);
       outInterface.parent.forEach(value => {
         if (value.startsWith('eval:')) {
-          out.push(
-            '// eslint-disable-next-line @typescript-eslint/ban-ts-ignore'
-          );
           out.push('// @ts-ignore');
         }
 

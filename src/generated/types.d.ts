@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import sinon from 'sinon';
 
 export interface SinonEventStub {
@@ -346,7 +348,6 @@ export interface Devtools {
 }
 
 export interface DevtoolsInspectedWindow {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   eval: sinon.SinonStub;
   reload: sinon.SinonStub;
@@ -1114,9 +1115,7 @@ export interface SidebarAction {
 export interface Storage {
   onChanged: SinonEventStub;
   StorageChange: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     oldValue?: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     newValue?: any;
   };
   StorageArea: {
@@ -1487,7 +1486,6 @@ export interface WebRequest {
     hpkp?: string;
   };
   UploadData: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bytes?: any;
     file?: string;
   };
