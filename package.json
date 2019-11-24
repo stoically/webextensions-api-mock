@@ -1,6 +1,6 @@
 {
   "name": "webextensions-api-mock",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "WebExtensions API as sinon stubs",
   "main": "dist/index.js",
   "repository": {
