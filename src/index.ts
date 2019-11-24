@@ -80,7 +80,9 @@ export class WebExtensionsApiMock {
       return;
     }
 
-    browser[namespace.namespace] = {};
+    if (!browser[namespace.namespace]) {
+      browser[namespace.namespace] = {};
+    }
 
     if (namespace.properties) {
       Object.keys(namespace.properties).forEach(propertyName => {
