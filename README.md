@@ -7,10 +7,10 @@ To get globally declared `window.browser` types for production code I'd recommen
 ## Install
 
 ```shell
-npm install --save-dev sinon webextensions-api-mock @types/sinon
+npm install --save-dev sinon webextensions-api-mock
 ```
 
-**Important**: `sinon` is a peer dependency, so you have to install it, and its @types yourself. That's because it can otherwise lead to unexpected assertion behavior when sinon does `instanceof` checks internally. It also allows to upgrade sinon without the need to bump the version in `webextensions-api-mock`.
+**Important**: `sinon` is a peer dependency, so you have to install it yourself. That's because it can otherwise lead to unexpected assertion behavior when sinon does `instanceof` checks internally. It also allows to upgrade sinon without the need to bump the version in `webextensions-api-mock`.
 
 ## Usage
 
