@@ -8,7 +8,11 @@ describe('WebExtensionsApiMock', () => {
     assert(typeof browser.tabs.create === 'function');
     assert(typeof browser.tabs.create.resolves === 'function');
     assert(typeof browser.storage.local.get === 'function');
-    // assert(typeof browser.storage.sync.onChange === 'function');
+    assert(typeof browser.storage.onChanged.addListener === 'function');
+    assert(
+      typeof browser.browserSettings.cacheEnabled.onChange?.addListener ===
+        'function'
+    );
   });
 
   it('should expose the sinon sandbox', async () => {

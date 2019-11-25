@@ -108,11 +108,7 @@ export class WebExtensionsApiMock {
 
           if (ref?.events) {
             ref.events.forEach(event => {
-              if (
-                !event.name ||
-                event.type !== 'function' ||
-                event.unsupported
-              ) {
+              if (!event.name || event.type !== 'function') {
                 return;
               }
               browser[namespace.namespace][propertyName][event.name] = {
@@ -125,7 +121,7 @@ export class WebExtensionsApiMock {
 
           if (ref?.functions) {
             ref.functions.forEach(fn => {
-              if (!fn.name || fn.type !== 'function' || fn.unsupported) {
+              if (!fn.name || fn.type !== 'function') {
                 return;
               }
               browser[namespace.namespace][propertyName][
@@ -139,7 +135,7 @@ export class WebExtensionsApiMock {
 
     if (namespace.events) {
       namespace.events.forEach(event => {
-        if (!event.name || event.type !== 'function' || event.unsupported) {
+        if (!event.name || event.type !== 'function') {
           return;
         }
         browser[namespace.namespace][event.name] = {
@@ -152,7 +148,7 @@ export class WebExtensionsApiMock {
 
     if (namespace.functions) {
       namespace.functions.forEach(fn => {
-        if (!fn.name || fn.type !== 'function' || fn.unsupported) {
+        if (!fn.name || fn.type !== 'function') {
           return;
         }
         browser[namespace.namespace][fn.name] = sandbox.stub();

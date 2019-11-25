@@ -149,10 +149,15 @@ export interface Bookmarks {
   update: sinon.SinonStub;
   remove: sinon.SinonStub;
   removeTree: sinon.SinonStub;
+  import?: sinon.SinonStub;
+  export?: sinon.SinonStub;
   onCreated: SinonEventStub;
   onRemoved: SinonEventStub;
   onChanged: SinonEventStub;
   onMoved: SinonEventStub;
+  onChildrenReordered?: SinonEventStub;
+  onImportBegan?: SinonEventStub;
+  onImportEnded?: SinonEventStub;
   BookmarkTreeNodeUnmodifiable: BookmarksBookmarkTreeNodeUnmodifiable[];
   BookmarkTreeNodeType: BookmarksBookmarkTreeNodeType[];
   BookmarkTreeNode: {
@@ -224,14 +229,18 @@ export type BrowserSettingsContextMenuMouseEvent = 'mouseup' | 'mousedown';
 export interface BrowsingData {
   settings: sinon.SinonStub;
   remove: sinon.SinonStub;
+  removeAppcache?: sinon.SinonStub;
   removeCache: sinon.SinonStub;
   removeCookies: sinon.SinonStub;
   removeDownloads: sinon.SinonStub;
+  removeFileSystems?: sinon.SinonStub;
   removeFormData: sinon.SinonStub;
   removeHistory: sinon.SinonStub;
+  removeIndexedDB?: sinon.SinonStub;
   removeLocalStorage: sinon.SinonStub;
   removePluginData: sinon.SinonStub;
   removePasswords: sinon.SinonStub;
+  removeWebSQL?: sinon.SinonStub;
   RemovalOptions: {
     hostnames?: string[];
   };
@@ -351,7 +360,12 @@ export interface DevtoolsInspectedWindow {
   // @ts-ignore
   eval: sinon.SinonStub;
   reload: sinon.SinonStub;
+  getResources?: sinon.SinonStub;
+  onResourceAdded?: SinonEventStub;
+  onResourceContentCommitted?: SinonEventStub;
   Resource: {
+    getContent?: sinon.SinonStub;
+    setContent?: sinon.SinonStub;
     url: string;
   };
 }
@@ -367,24 +381,35 @@ export interface DevtoolsNetwork {
 
 export interface DevtoolsPanels {
   create: sinon.SinonStub;
+  setOpenResourceHandler?: sinon.SinonStub;
+  openResource?: sinon.SinonStub;
   onThemeChanged: SinonEventStub;
   ElementsPanel: {
     createSidebarPane: sinon.SinonStub;
     onSelectionChanged: SinonEventStub;
   };
-  SourcesPanel: {};
+  SourcesPanel: {
+    createSidebarPane?: sinon.SinonStub;
+    onSelectionChanged?: SinonEventStub;
+  };
   ExtensionPanel: {
+    createStatusBarButton?: sinon.SinonStub;
+    onSearch?: SinonEventStub;
     onShown: SinonEventStub;
     onHidden: SinonEventStub;
   };
   ExtensionSidebarPane: {
+    setHeight?: sinon.SinonStub;
     setExpression: sinon.SinonStub;
     setObject: sinon.SinonStub;
     setPage: sinon.SinonStub;
     onShown: SinonEventStub;
     onHidden: SinonEventStub;
   };
-  Button: {};
+  Button: {
+    update?: sinon.SinonStub;
+    onClicked?: SinonEventStub;
+  };
   elements: DevtoolsPanels['ElementsPanel'];
   sources: DevtoolsPanels['SourcesPanel'];
   themeName: string[];
@@ -411,6 +436,9 @@ export interface Downloads {
   showDefaultFolder: sinon.SinonStub;
   erase: sinon.SinonStub;
   removeFile: sinon.SinonStub;
+  acceptDanger?: sinon.SinonStub;
+  drag?: sinon.SinonStub;
+  setShelfEnabled?: sinon.SinonStub;
   onCreated: SinonEventStub;
   onErased: SinonEventStub;
   onChanged: SinonEventStub;
@@ -514,6 +542,9 @@ export interface Events {
     removeListener: sinon.SinonStub;
     hasListener: sinon.SinonStub;
     hasListeners: sinon.SinonStub;
+    addRules?: sinon.SinonStub;
+    getRules?: sinon.SinonStub;
+    removeRules?: sinon.SinonStub;
   };
   UrlFilter: {
     hostContains?: string;
@@ -564,6 +595,9 @@ export interface Extension {
   getBackgroundPage: sinon.SinonStub;
   isAllowedIncognitoAccess: sinon.SinonStub;
   isAllowedFileSchemeAccess: sinon.SinonStub;
+  setUpdateUrlData?: sinon.SinonStub;
+  onRequest?: SinonEventStub;
+  onRequestExternal?: SinonEventStub;
   ViewType: ExtensionViewType[];
   lastError: {
     message: string;
@@ -684,8 +718,13 @@ export interface I18n {
 }
 
 export interface Identity {
+  getAccounts?: sinon.SinonStub;
+  getAuthToken?: sinon.SinonStub;
+  getProfileUserInfo?: sinon.SinonStub;
+  removeCachedAuthToken?: sinon.SinonStub;
   launchWebAuthFlow: sinon.SinonStub;
   getRedirectURL: sinon.SinonStub;
+  onSignInChanged?: SinonEventStub;
   AccountInfo: {
     id: string;
   };
@@ -835,11 +874,15 @@ export interface NormandyAddonStudy {
 
 export interface Notifications {
   create: sinon.SinonStub;
+  update?: sinon.SinonStub;
   clear: sinon.SinonStub;
   getAll: sinon.SinonStub;
+  getPermissionLevel?: sinon.SinonStub;
   onClosed: SinonEventStub;
   onClicked: SinonEventStub;
   onButtonClicked: SinonEventStub;
+  onPermissionLevelChanged?: SinonEventStub;
+  onShowSettings?: SinonEventStub;
   onShown: SinonEventStub;
   TemplateType: NotificationsTemplateType[];
   PermissionLevel: NotificationsPermissionLevel[];
@@ -918,6 +961,8 @@ export interface Permissions {
   contains: sinon.SinonStub;
   request: sinon.SinonStub;
   remove: sinon.SinonStub;
+  onAdded?: SinonEventStub;
+  onRemoved?: SinonEventStub;
   Permissions: {};
   AnyPermissions: {};
 }
@@ -1004,19 +1049,26 @@ export interface Runtime {
   getURL: sinon.SinonStub;
   setUninstallURL: sinon.SinonStub;
   reload: sinon.SinonStub;
+  requestUpdateCheck?: sinon.SinonStub;
+  restart?: sinon.SinonStub;
   connect: sinon.SinonStub;
   connectNative: sinon.SinonStub;
   sendMessage: sinon.SinonStub;
   sendNativeMessage: sinon.SinonStub;
   getBrowserInfo: sinon.SinonStub;
   getPlatformInfo: sinon.SinonStub;
+  getPackageDirectoryEntry?: sinon.SinonStub;
   onStartup: SinonEventStub;
   onInstalled: SinonEventStub;
+  onSuspend?: SinonEventStub;
+  onSuspendCanceled?: SinonEventStub;
   onUpdateAvailable: SinonEventStub;
+  onBrowserUpdateAvailable?: SinonEventStub;
   onConnect: SinonEventStub;
   onConnectExternal: SinonEventStub;
   onMessage: SinonEventStub;
   onMessageExternal: SinonEventStub;
+  onRestartRequired?: SinonEventStub;
   Port: {
     name: string;
   };
@@ -1081,6 +1133,7 @@ export interface Sessions {
   forgetClosedTab: sinon.SinonStub;
   forgetClosedWindow: sinon.SinonStub;
   getRecentlyClosed: sinon.SinonStub;
+  getDevices?: sinon.SinonStub;
   restore: sinon.SinonStub;
   setTabValue: sinon.SinonStub;
   getTabValue: sinon.SinonStub;
@@ -1122,6 +1175,7 @@ export interface Storage {
   };
   StorageArea: {
     get: sinon.SinonStub;
+    getBytesInUse?: sinon.SinonStub;
     set: sinon.SinonStub;
     remove: sinon.SinonStub;
     clear: sinon.SinonStub;
@@ -1135,7 +1189,10 @@ export interface Tabs {
   get: sinon.SinonStub;
   getCurrent: sinon.SinonStub;
   connect: sinon.SinonStub;
+  sendRequest?: sinon.SinonStub;
   sendMessage: sinon.SinonStub;
+  getSelected?: sinon.SinonStub;
+  getAllInWindow?: sinon.SinonStub;
   create: sinon.SinonStub;
   duplicate: sinon.SinonStub;
   query: sinon.SinonStub;
@@ -1165,7 +1222,10 @@ export interface Tabs {
   onCreated: SinonEventStub;
   onUpdated: SinonEventStub;
   onMoved: SinonEventStub;
+  onSelectionChanged?: SinonEventStub;
+  onActiveChanged?: SinonEventStub;
   onActivated: SinonEventStub;
+  onHighlightChanged?: SinonEventStub;
   onHighlighted: SinonEventStub;
   onDetached: SinonEventStub;
   onAttached: SinonEventStub;
@@ -1296,7 +1356,11 @@ export interface Test {
   succeed: sinon.SinonStub;
   assertTrue: sinon.SinonStub;
   assertFalse: sinon.SinonStub;
+  assertBool?: sinon.SinonStub;
+  checkDeepEq?: sinon.SinonStub;
   assertEq: sinon.SinonStub;
+  assertNoLastError?: sinon.SinonStub;
+  assertLastError?: sinon.SinonStub;
   assertRejects: sinon.SinonStub;
   assertThrows: sinon.SinonStub;
   onMessage: SinonEventStub;
@@ -1329,6 +1393,7 @@ export interface Types {
     get: sinon.SinonStub;
     set: sinon.SinonStub;
     clear: sinon.SinonStub;
+    onChange?: SinonEventStub;
   };
 }
 

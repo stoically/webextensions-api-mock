@@ -127,13 +127,13 @@ export class TypeSchemaGenerator {
   }
 
   private fn(fn: TypeSchema): string | false {
-    if (!fn.name || fn.unsupported) return false;
-    return `${fn.name}: sinon.SinonStub;`;
+    if (!fn.name) return false;
+    return `${fn.name}${fn.unsupported ? '?' : ''}: sinon.SinonStub;`;
   }
 
   private event(event: TypeSchema): string | false {
-    if (!event.name || event.unsupported) return false;
-    return `${event.name}: SinonEventStub;`;
+    if (!event.name) return false;
+    return `${event.name}${event.unsupported ? '?' : ''}: SinonEventStub;`;
   }
 
   private string(name: string, enums?: Enum[]): string {
