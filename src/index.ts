@@ -1,16 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import sinon from 'sinon';
-import {
-  SchemaNamespaces,
-  NamespaceSchema,
-  TypeSchema,
-} from 'webextensions-schema';
+import { SchemaNamespaces, TypeSchema } from 'webextensions-schema';
 import { Update } from './update';
+import { BrowserBuilder } from './stub';
 import { BrowserMock } from './generated/types';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BrowserOut = any;
 
 export class WebExtensionsApiMock {
   public namespaces!: SchemaNamespaces;
@@ -21,23 +14,17 @@ export class WebExtensionsApiMock {
       this.readSchema();
     }
 
-    const sandbox = sinon.createSandbox();
-    const aliases = new Map();
-    const browser: BrowserOut = {
-      sinonSandbox: sandbox,
-    };
+    const builder = new BrowserBuilder(this.types);
 
     Object.values(this.namespaces).forEach(namespaces =>
-      namespaces.forEach(namespace =>
-        this.createNamespaceStub(sandbox, namespace, browser, aliases)
-      )
+      namespaces.forEach(namespace => builder.namespace(namespace))
     );
 
-    aliases.forEach((to, from) => {
-      browser[from] = browser[to];
+    builder.aliases.forEach((to, from) => {
+      builder.browser[from] = builder.browser[to];
     });
 
-    return browser;
+    return builder.browser;
   }
 
   readSchema(): void {
@@ -67,93 +54,6 @@ export class WebExtensionsApiMock {
         });
       })
     );
-  }
-
-  createNamespaceStub(
-    sandbox: sinon.SinonSandbox,
-    namespace: NamespaceSchema,
-    browser: BrowserOut,
-    aliases: Map<string, string>
-  ): void {
-    if (namespace.$import) {
-      aliases.set(namespace.namespace, namespace.$import);
-      return;
-    }
-
-    if (!browser[namespace.namespace]) {
-      browser[namespace.namespace] = {};
-    }
-
-    if (namespace.properties) {
-      Object.keys(namespace.properties).forEach(propertyName => {
-        if (!namespace.properties) return;
-
-        const property = namespace.properties[propertyName];
-        if (property.value) {
-          browser[namespace.namespace][propertyName] = property.value;
-        }
-
-        if (property.$ref) {
-          const refName = property.$ref.includes('.')
-            ? property.$ref
-            : `${namespace.namespace}.${property.$ref}`;
-          const ref = this.types.get(refName);
-
-          if (
-            (ref?.events || ref?.functions) &&
-            !browser[namespace.namespace][propertyName]
-          ) {
-            browser[namespace.namespace][propertyName] = {};
-          }
-
-          if (ref?.events) {
-            ref.events.forEach(event => {
-              if (!event.name || event.type !== 'function') {
-                return;
-              }
-              browser[namespace.namespace][propertyName][event.name] = {
-                addListener: sandbox.stub(),
-                removeListener: sandbox.stub(),
-                hasListener: sandbox.stub(),
-              };
-            });
-          }
-
-          if (ref?.functions) {
-            ref.functions.forEach(fn => {
-              if (!fn.name || fn.type !== 'function') {
-                return;
-              }
-              browser[namespace.namespace][propertyName][
-                fn.name
-              ] = sandbox.stub();
-            });
-          }
-        }
-      });
-    }
-
-    if (namespace.events) {
-      namespace.events.forEach(event => {
-        if (!event.name || event.type !== 'function') {
-          return;
-        }
-        browser[namespace.namespace][event.name] = {
-          addListener: sandbox.stub(),
-          removeListener: sandbox.stub(),
-          hasListener: sandbox.stub(),
-        };
-      });
-    }
-
-    if (namespace.functions) {
-      namespace.functions.forEach(fn => {
-        if (!fn.name || fn.type !== 'function') {
-          return;
-        }
-        browser[namespace.namespace][fn.name] = sandbox.stub();
-      });
-    }
   }
 
   update = async (): Promise<void> => {
