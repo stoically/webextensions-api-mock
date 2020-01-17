@@ -15,7 +15,7 @@
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:copy": "copyup \"src/generated/*\" dist",
     "watch": "tsc --watch",
-    "lint": "eslint {src,test}/**/*.ts",
+    "lint": "eslint '{src,test}'/**/*.ts",
     "test": "ts-mocha",
     "test:watch": "ts-mocha --watch"
   },
