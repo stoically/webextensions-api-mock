@@ -14,6 +14,7 @@
     "build": "npm-run-all lint test build:*",
     "build:tsc": "tsc -p tsconfig.build.json",
     "build:copy": "copyup \"src/generated/*\" dist",
+    "generate": "ts-node src/bin.ts",
     "watch": "tsc --watch",
     "lint": "eslint '{src,test}'/**/*.ts",
     "test": "ts-mocha",
@@ -43,10 +44,12 @@
     "sinon": "^7.5.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.7",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.11",
     "@types/prettier": "^1.18.4",
     "@types/sinon": "^7.5.1",
+    "@types/sinon-chai": "^3.2.3",
     "@typescript-eslint/eslint-plugin": "^2.8.0",
     "@typescript-eslint/parser": "^2.8.0",
     "chai": "^4.2.0",

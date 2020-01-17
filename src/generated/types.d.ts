@@ -2,15 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import sinon from 'sinon';
 
-export interface SinonEventStub {
-  addListener: sinon.SinonStub;
-  removeListener: sinon.SinonStub;
-  hasListener: sinon.SinonStub;
-}
-
 export interface BrowserMock {
-  sinonSandbox: sinon.SinonSandbox;
-  manifest: Manifest;
   activityLog: ActivityLog;
   alarms: Alarms;
   bookmarks: Bookmarks;
@@ -21,6 +13,7 @@ export interface BrowserMock {
   clipboard: Clipboard;
   commands: Commands;
   contentScripts: ContentScripts;
+  contextMenus: ContextMenus;
   contextualIdentities: ContextualIdentities;
   cookies: Cookies;
   devtools: Devtools;
@@ -37,7 +30,7 @@ export interface BrowserMock {
   identity: Identity;
   idle: Idle;
   management: Management;
-  contextMenus: ContextMenus;
+  manifest: Manifest;
   menus: Menus;
   networkStatus: NetworkStatus;
   normandyAddonStudy: NormandyAddonStudy;
@@ -52,6 +45,7 @@ export interface BrowserMock {
   search: Search;
   sessions: Sessions;
   sidebarAction: SidebarAction;
+  sinonSandbox: sinon.SinonSandbox;
   storage: Storage;
   tabs: Tabs;
   telemetry: Telemetry;
@@ -66,146 +60,101 @@ export interface BrowserMock {
   windows: Windows;
 }
 
-export interface Manifest {
-  KeyName: string[];
-  ProtocolHandler: {
-    name: string;
-  };
-  ManifestBase: {
-    manifest_version: number;
-    name: string;
-    short_name?: string;
-    description?: string;
-    author?: string;
-    version: string;
-    homepage_url?: string;
-  };
-  WebExtensionManifest: {
-    minimum_chrome_version?: string;
-    minimum_opera_version?: string;
-    incognito?: string;
-    content_security_policy?: string;
-    web_accessible_resources?: string[];
-    hidden?: boolean;
-  };
-  WebExtensionLangpackManifest: {
-    homepage_url?: string;
-    langpack_id: string;
-  };
-  WebExtensionDictionaryManifest: {
-    homepage_url?: string;
-  };
-  ThemeIcons: {
-    size: number;
-  };
-  HttpURL: string[];
-  ExtensionURL: string[];
-  ExtensionFileUrl: string[];
-  ImageDataOrExtensionURL: string[];
-  FirefoxSpecificProperties: {
-    update_url?: string;
-    strict_min_version?: string;
-    strict_max_version?: string;
-  };
-  ContentScript: {
-    include_globs?: string[];
-    exclude_globs?: string[];
-    all_frames?: boolean;
-    match_about_blank?: boolean;
-  };
-  ImageData: {};
-  ThemeExperiment: {};
-  ThemeType: {};
-  ThemeManifest: {
-    default_locale?: string;
-  };
-}
-
 export interface ActivityLog {
-  onExtensionActivity: SinonEventStub;
+  onExtensionActivity: Events['Event'];
 }
 
 export interface Alarms {
+  Alarm: {
+    name: string;
+    periodInMinutes?: number;
+    scheduledTime: number;
+  };
+  clear: sinon.SinonStub;
+  clearAll: sinon.SinonStub;
   create: sinon.SinonStub;
   get: sinon.SinonStub;
   getAll: sinon.SinonStub;
-  clear: sinon.SinonStub;
-  clearAll: sinon.SinonStub;
-  onAlarm: SinonEventStub;
-  Alarm: {
-    name: string;
-  };
+  onAlarm: Events['Event'];
 }
 
 export interface Bookmarks {
+  BookmarkTreeNode: {
+    children?: Bookmarks['BookmarkTreeNode'][];
+    dateAdded?: number;
+    dateGroupModified?: number;
+    id: string;
+    index?: number;
+    parentId?: string;
+    title: string;
+    type?: Bookmarks['BookmarkTreeNodeType'];
+    unmodifiable?: Bookmarks['BookmarkTreeNodeUnmodifiable'];
+    url?: string;
+  };
+  BookmarkTreeNodeType: BookmarksBookmarkTreeNodeType;
+  BookmarkTreeNodeUnmodifiable: BookmarksBookmarkTreeNodeUnmodifiable;
+  CreateDetails: {
+    index?: number;
+    parentId?: string;
+    title?: string;
+    type?: Bookmarks['BookmarkTreeNodeType'];
+    url?: string;
+  };
+  create: sinon.SinonStub;
+  export?: sinon.SinonStub;
   get: sinon.SinonStub;
   getChildren: sinon.SinonStub;
   getRecent: sinon.SinonStub;
-  getTree: sinon.SinonStub;
   getSubTree: sinon.SinonStub;
-  search: sinon.SinonStub;
-  create: sinon.SinonStub;
+  getTree: sinon.SinonStub;
+  import?: sinon.SinonStub;
   move: sinon.SinonStub;
-  update: sinon.SinonStub;
+  onChanged: Events['Event'];
+  onChildrenReordered: Events['Event'];
+  onCreated: Events['Event'];
+  onImportBegan: Events['Event'];
+  onImportEnded: Events['Event'];
+  onMoved: Events['Event'];
+  onRemoved: Events['Event'];
   remove: sinon.SinonStub;
   removeTree: sinon.SinonStub;
-  import?: sinon.SinonStub;
-  export?: sinon.SinonStub;
-  onCreated: SinonEventStub;
-  onRemoved: SinonEventStub;
-  onChanged: SinonEventStub;
-  onMoved: SinonEventStub;
-  onChildrenReordered?: SinonEventStub;
-  onImportBegan?: SinonEventStub;
-  onImportEnded?: SinonEventStub;
-  BookmarkTreeNodeUnmodifiable: BookmarksBookmarkTreeNodeUnmodifiable[];
-  BookmarkTreeNodeType: BookmarksBookmarkTreeNodeType[];
-  BookmarkTreeNode: {
-    id: string;
-    parentId?: string;
-    index?: number;
-    url?: string;
-    title: string;
-  };
-  CreateDetails: {
-    parentId?: string;
-    index?: number;
-    title?: string;
-    url?: string;
-  };
+  search: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
-
-export type BookmarksBookmarkTreeNodeUnmodifiable = 'managed';
 
 export type BookmarksBookmarkTreeNodeType = 'bookmark' | 'folder' | 'separator';
 
+export type BookmarksBookmarkTreeNodeUnmodifiable = 'managed';
+
 export interface BrowserAction {
-  setTitle: sinon.SinonStub;
-  getTitle: sinon.SinonStub;
-  setIcon: sinon.SinonStub;
-  setPopup: sinon.SinonStub;
-  getPopup: sinon.SinonStub;
-  setBadgeText: sinon.SinonStub;
-  getBadgeText: sinon.SinonStub;
-  setBadgeBackgroundColor: sinon.SinonStub;
-  getBadgeBackgroundColor: sinon.SinonStub;
-  setBadgeTextColor: sinon.SinonStub;
-  getBadgeTextColor: sinon.SinonStub;
-  enable: sinon.SinonStub;
-  disable: sinon.SinonStub;
-  isEnabled: sinon.SinonStub;
-  openPopup: sinon.SinonStub;
-  onClicked: SinonEventStub;
+  ColorArray: number[];
+  ColorValue: any;
   Details: {
     tabId?: number;
     windowId?: number;
   };
   ImageDataType: {};
+  disable: sinon.SinonStub;
+  enable: sinon.SinonStub;
+  getBadgeBackgroundColor: sinon.SinonStub;
+  getBadgeText: sinon.SinonStub;
+  getBadgeTextColor: sinon.SinonStub;
+  getPopup: sinon.SinonStub;
+  getTitle: sinon.SinonStub;
+  isEnabled: sinon.SinonStub;
+  onClicked: Events['Event'];
+  openPopup: sinon.SinonStub;
+  setBadgeBackgroundColor: sinon.SinonStub;
+  setBadgeText: sinon.SinonStub;
+  setBadgeTextColor: sinon.SinonStub;
+  setIcon: sinon.SinonStub;
+  setPopup: sinon.SinonStub;
+  setTitle: sinon.SinonStub;
 }
 
 export interface BrowserSettings {
-  ImageAnimationBehavior: BrowserSettingsImageAnimationBehavior[];
-  ContextMenuMouseEvent: BrowserSettingsContextMenuMouseEvent[];
+  ContextMenuMouseEvent: BrowserSettingsContextMenuMouseEvent;
+  ImageAnimationBehavior: BrowserSettingsImageAnimationBehavior;
   allowPopupsForUserEvents: Types['Setting'];
   cacheEnabled: Types['Setting'];
   closeTabsByDoubleClick: Types['Setting'];
@@ -217,17 +166,38 @@ export interface BrowserSettings {
   openBookmarksInNewTabs: Types['Setting'];
   openSearchResultsInNewTabs: Types['Setting'];
   openUrlbarResultsInNewTabs: Types['Setting'];
-  webNotificationsDisabled: Types['Setting'];
   overrideDocumentColors: Types['Setting'];
   useDocumentFonts: Types['Setting'];
+  webNotificationsDisabled: Types['Setting'];
 }
-
-export type BrowserSettingsImageAnimationBehavior = 'normal' | 'none' | 'once';
 
 export type BrowserSettingsContextMenuMouseEvent = 'mouseup' | 'mousedown';
 
+export type BrowserSettingsImageAnimationBehavior = 'normal' | 'none' | 'once';
+
 export interface BrowsingData {
-  settings: sinon.SinonStub;
+  DataTypeSet: {
+    cache?: boolean;
+    cookies?: boolean;
+    downloads?: boolean;
+    formData?: boolean;
+    history?: boolean;
+    indexedDB?: boolean;
+    localStorage?: boolean;
+    passwords?: boolean;
+    pluginData?: boolean;
+    serverBoundCertificates?: boolean;
+    serviceWorkers?: boolean;
+  };
+  RemovalOptions: {
+    hostnames?: string[];
+    originTypes?: {
+      extension?: boolean;
+      protectedWeb?: boolean;
+      unprotectedWeb?: boolean;
+    };
+    since?: ExtensionTypes['Date'];
+  };
   remove: sinon.SinonStub;
   removeAppcache?: sinon.SinonStub;
   removeCache: sinon.SinonStub;
@@ -238,32 +208,17 @@ export interface BrowsingData {
   removeHistory: sinon.SinonStub;
   removeIndexedDB?: sinon.SinonStub;
   removeLocalStorage: sinon.SinonStub;
-  removePluginData: sinon.SinonStub;
   removePasswords: sinon.SinonStub;
+  removePluginData: sinon.SinonStub;
   removeWebSQL?: sinon.SinonStub;
-  RemovalOptions: {
-    hostnames?: string[];
-  };
-  DataTypeSet: {
-    cache?: boolean;
-    cookies?: boolean;
-    downloads?: boolean;
-    formData?: boolean;
-    history?: boolean;
-    indexedDB?: boolean;
-    localStorage?: boolean;
-    serverBoundCertificates?: boolean;
-    passwords?: boolean;
-    pluginData?: boolean;
-    serviceWorkers?: boolean;
-  };
+  settings: sinon.SinonStub;
 }
 
 export interface CaptivePortal {
-  getState: sinon.SinonStub;
   getLastChecked: sinon.SinonStub;
-  onStateChanged: SinonEventStub;
-  onConnectivityAvailable: SinonEventStub;
+  getState: sinon.SinonStub;
+  onConnectivityAvailable: Events['Event'];
+  onStateChanged: Events['Event'];
 }
 
 export interface Clipboard {
@@ -271,77 +226,102 @@ export interface Clipboard {
 }
 
 export interface Commands {
-  update: sinon.SinonStub;
-  reset: sinon.SinonStub;
-  getAll: sinon.SinonStub;
-  onCommand: SinonEventStub;
   Command: {
-    name?: string;
     description?: string;
+    name?: string;
     shortcut?: string;
   };
+  getAll: sinon.SinonStub;
+  onCommand: Events['Event'];
+  reset: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
 export interface ContentScripts {
-  register: sinon.SinonStub;
-  RegisteredContentScriptOptions: {
-    includeGlobs?: string[];
-    excludeGlobs?: string[];
-    allFrames?: boolean;
-    matchAboutBlank?: boolean;
-  };
   RegisteredContentScript: {
     unregister: sinon.SinonStub;
   };
+  RegisteredContentScriptOptions: {
+    allFrames?: boolean;
+    css?: ExtensionTypes['ExtensionFileOrCode'][];
+    excludeGlobs?: string[];
+    excludeMatches?: Manifest['MatchPattern'][];
+    includeGlobs?: string[];
+    js?: ExtensionTypes['ExtensionFileOrCode'][];
+    matchAboutBlank?: boolean;
+    matches: Manifest['MatchPattern'][];
+    runAt?: ExtensionTypes['RunAt'];
+  };
+  register: sinon.SinonStub;
 }
 
+export type ContextMenus = Menus;
+
+export type ContextMenusContextType =
+  | 'all'
+  | 'page'
+  | 'frame'
+  | 'selection'
+  | 'link'
+  | 'editable'
+  | 'password'
+  | 'image'
+  | 'video'
+  | 'audio'
+  | 'launcher'
+  | 'bookmark'
+  | 'browser_action'
+  | 'page_action'
+  | 'tab';
+
 export interface ContextualIdentities {
-  get: sinon.SinonStub;
-  query: sinon.SinonStub;
-  create: sinon.SinonStub;
-  update: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  onUpdated: SinonEventStub;
-  onCreated: SinonEventStub;
-  onRemoved: SinonEventStub;
   ContextualIdentity: {
-    name: string;
-    icon: string;
-    iconUrl: string;
     color: string;
     colorCode: string;
     cookieStoreId: string;
+    icon: string;
+    iconUrl: string;
+    name: string;
   };
+  create: sinon.SinonStub;
+  get: sinon.SinonStub;
+  onCreated: Events['Event'];
+  onRemoved: Events['Event'];
+  onUpdated: Events['Event'];
+  query: sinon.SinonStub;
+  remove: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
 export interface Cookies {
-  get: sinon.SinonStub;
-  getAll: sinon.SinonStub;
-  set: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  getAllCookieStores: sinon.SinonStub;
-  onChanged: SinonEventStub;
-  SameSiteStatus: CookiesSameSiteStatus[];
   Cookie: {
-    name: string;
-    value: string;
     domain: string;
+    expirationDate?: number;
+    firstPartyDomain: string;
     hostOnly: boolean;
-    path: string;
-    secure: boolean;
     httpOnly: boolean;
+    name: string;
+    path: string;
+    sameSite: Cookies['SameSiteStatus'];
+    secure: boolean;
     session: boolean;
     storeId: string;
-    firstPartyDomain: string;
+    value: string;
   };
   CookieStore: {
     id: string;
     incognito: boolean;
+    tabIds: number[];
   };
-  OnChangedCause: CookiesOnChangedCause[];
+  OnChangedCause: CookiesOnChangedCause;
+  SameSiteStatus: CookiesSameSiteStatus;
+  get: sinon.SinonStub;
+  getAll: sinon.SinonStub;
+  getAllCookieStores: sinon.SinonStub;
+  onChanged: Events['Event'];
+  remove: sinon.SinonStub;
+  set: sinon.SinonStub;
 }
-
-export type CookiesSameSiteStatus = 'no_restriction' | 'lax' | 'strict';
 
 export type CookiesOnChangedCause =
   | 'evicted'
@@ -350,6 +330,8 @@ export type CookiesOnChangedCause =
   | 'expired_overwrite'
   | 'overwrite';
 
+export type CookiesSameSiteStatus = 'no_restriction' | 'lax' | 'strict';
+
 export interface Devtools {
   inspectedWindow: DevtoolsInspectedWindow;
   network: DevtoolsNetwork;
@@ -357,136 +339,180 @@ export interface Devtools {
 }
 
 export interface DevtoolsInspectedWindow {
-  // @ts-ignore
-  eval: sinon.SinonStub;
-  reload: sinon.SinonStub;
-  getResources?: sinon.SinonStub;
-  onResourceAdded?: SinonEventStub;
-  onResourceContentCommitted?: SinonEventStub;
   Resource: {
     getContent?: sinon.SinonStub;
     setContent?: sinon.SinonStub;
     url: string;
   };
+  // @ts-ignore
+  eval: sinon.SinonStub;
+  getResources?: sinon.SinonStub;
+  onResourceAdded: Events['Event'];
+  onResourceContentCommitted: Events['Event'];
+  reload: sinon.SinonStub;
+  tabId: number;
 }
 
 export interface DevtoolsNetwork {
-  getHAR: sinon.SinonStub;
-  onRequestFinished: SinonEventStub;
-  onNavigated: SinonEventStub;
   Request: {
     getContent: sinon.SinonStub;
   };
+  getHAR: sinon.SinonStub;
+  onNavigated: Events['Event'];
+  onRequestFinished: Events['Event'];
 }
 
 export interface DevtoolsPanels {
-  create: sinon.SinonStub;
-  setOpenResourceHandler?: sinon.SinonStub;
-  openResource?: sinon.SinonStub;
-  onThemeChanged: SinonEventStub;
+  Button: {
+    onClicked: Events['Event'];
+    update?: sinon.SinonStub;
+  };
   ElementsPanel: {
     createSidebarPane: sinon.SinonStub;
-    onSelectionChanged: SinonEventStub;
+    onSelectionChanged: Events['Event'];
+  };
+  ExtensionPanel: {
+    createStatusBarButton?: sinon.SinonStub<any[], DevtoolsPanels['Button']>;
+    onHidden: Events['Event'];
+    onShown: Events['Event'];
+  };
+  ExtensionSidebarPane: {
+    onHidden: Events['Event'];
+    onShown: Events['Event'];
+    setExpression: sinon.SinonStub;
+    setHeight?: sinon.SinonStub;
+    setObject: sinon.SinonStub;
+    setPage: sinon.SinonStub;
   };
   SourcesPanel: {
     createSidebarPane?: sinon.SinonStub;
-    onSelectionChanged?: SinonEventStub;
   };
-  ExtensionPanel: {
-    createStatusBarButton?: sinon.SinonStub;
-    onSearch?: SinonEventStub;
-    onShown: SinonEventStub;
-    onHidden: SinonEventStub;
-  };
-  ExtensionSidebarPane: {
-    setHeight?: sinon.SinonStub;
-    setExpression: sinon.SinonStub;
-    setObject: sinon.SinonStub;
-    setPage: sinon.SinonStub;
-    onShown: SinonEventStub;
-    onHidden: SinonEventStub;
-  };
-  Button: {
-    update?: sinon.SinonStub;
-    onClicked?: SinonEventStub;
-  };
+  create: sinon.SinonStub;
   elements: DevtoolsPanels['ElementsPanel'];
+  onThemeChanged: Events['Event'];
+  openResource?: sinon.SinonStub;
+  setOpenResourceHandler?: sinon.SinonStub;
   sources: DevtoolsPanels['SourcesPanel'];
-  themeName: string[];
+  themeName: string;
 }
 
 export interface Dns {
-  resolve: sinon.SinonStub;
   DNSRecord: {
+    addresses: string[];
     canonicalName?: string;
     isTRR: string;
-    addresses: string[];
   };
+  ResolveFlags: DnsResolveFlags[];
+  resolve: sinon.SinonStub;
 }
 
+export type DnsResolveFlags =
+  | 'allow_name_collisions'
+  | 'bypass_cache'
+  | 'canonical_name'
+  | 'disable_ipv4'
+  | 'disable_ipv6'
+  | 'disable_trr'
+  | 'offline'
+  | 'priority_low'
+  | 'priority_medium'
+  | 'speculate';
+
 export interface Downloads {
-  download: sinon.SinonStub;
-  search: sinon.SinonStub;
-  pause: sinon.SinonStub;
-  resume: sinon.SinonStub;
-  cancel: sinon.SinonStub;
-  getFileIcon: sinon.SinonStub;
-  open: sinon.SinonStub;
-  show: sinon.SinonStub;
-  showDefaultFolder: sinon.SinonStub;
-  erase: sinon.SinonStub;
-  removeFile: sinon.SinonStub;
-  acceptDanger?: sinon.SinonStub;
-  drag?: sinon.SinonStub;
-  setShelfEnabled?: sinon.SinonStub;
-  onCreated: SinonEventStub;
-  onErased: SinonEventStub;
-  onChanged: SinonEventStub;
-  FilenameConflictAction: DownloadsFilenameConflictAction[];
-  InterruptReason: DownloadsInterruptReason[];
-  DangerType: DownloadsDangerType[];
-  State: DownloadsState[];
-  DownloadItem: {
-    id: number;
-    url: string;
-    referrer?: string;
-    filename: string;
-    incognito: boolean;
-    mime?: string;
-    startTime: string;
-    endTime?: string;
-    estimatedEndTime?: string;
-    paused: boolean;
-    canResume: boolean;
-    exists: boolean;
-    byExtensionId?: string;
-    byExtensionName?: string;
-  };
-  StringDelta: {
-    current?: string;
-    previous?: string;
-  };
-  DoubleDelta: {};
   BooleanDelta: {
     current?: boolean;
     previous?: boolean;
   };
-  DownloadQuery: {
-    query?: string[];
-    filenameRegex?: string;
-    urlRegex?: string;
-    limit?: number;
-    orderBy?: string[];
-    id?: number;
-    url?: string;
-    filename?: string;
-    mime?: string;
-    startTime?: string;
-    endTime?: string;
-    paused?: boolean;
-    exists?: boolean;
+  DangerType: DownloadsDangerType;
+  DoubleDelta: {
+    current?: number;
+    previous?: number;
   };
+  DownloadItem: {
+    byExtensionId?: string;
+    byExtensionName?: string;
+    bytesReceived: number;
+    canResume: boolean;
+    danger: Downloads['DangerType'];
+    endTime?: string;
+    error?: Downloads['InterruptReason'];
+    estimatedEndTime?: string;
+    exists: boolean;
+    fileSize: number;
+    filename: string;
+    id: number;
+    incognito: boolean;
+    mime?: string;
+    paused: boolean;
+    referrer?: string;
+    startTime: string;
+    state: Downloads['State'];
+    totalBytes: number;
+    url: string;
+  };
+  DownloadQuery: {
+    bytesReceived?: number;
+    danger?: Downloads['DangerType'];
+    endTime?: string;
+    endedAfter?: Downloads['DownloadTime'];
+    endedBefore?: Downloads['DownloadTime'];
+    error?: Downloads['InterruptReason'];
+    exists?: boolean;
+    fileSize?: number;
+    filename?: string;
+    filenameRegex?: string;
+    id?: number;
+    limit?: number;
+    mime?: string;
+    orderBy?: string[];
+    paused?: boolean;
+    query?: string[];
+    startTime?: string;
+    startedAfter?: Downloads['DownloadTime'];
+    startedBefore?: Downloads['DownloadTime'];
+    state?: Downloads['State'];
+    totalBytes?: number;
+    totalBytesGreater?: number;
+    totalBytesLess?: number;
+    url?: string;
+    urlRegex?: string;
+  };
+  DownloadTime: any;
+  FilenameConflictAction: DownloadsFilenameConflictAction;
+  InterruptReason: DownloadsInterruptReason;
+  State: DownloadsState;
+  StringDelta: {
+    current?: string;
+    previous?: string;
+  };
+  acceptDanger?: sinon.SinonStub;
+  cancel: sinon.SinonStub;
+  download: sinon.SinonStub;
+  drag?: sinon.SinonStub;
+  erase: sinon.SinonStub;
+  getFileIcon: sinon.SinonStub;
+  onChanged: Events['Event'];
+  onCreated: Events['Event'];
+  onErased: Events['Event'];
+  open: sinon.SinonStub;
+  pause: sinon.SinonStub;
+  removeFile: sinon.SinonStub;
+  resume: sinon.SinonStub;
+  search: sinon.SinonStub;
+  setShelfEnabled?: sinon.SinonStub;
+  show: sinon.SinonStub;
+  showDefaultFolder: sinon.SinonStub;
 }
+
+export type DownloadsDangerType =
+  | 'file'
+  | 'url'
+  | 'content'
+  | 'uncommon'
+  | 'host'
+  | 'unwanted'
+  | 'safe'
+  | 'accepted';
 
 export type DownloadsFilenameConflictAction =
   | 'uniquify'
@@ -519,63 +545,77 @@ export type DownloadsInterruptReason =
   | 'USER_SHUTDOWN'
   | 'CRASH';
 
-export type DownloadsDangerType =
-  | 'file'
-  | 'url'
-  | 'content'
-  | 'uncommon'
-  | 'host'
-  | 'unwanted'
-  | 'safe'
-  | 'accepted';
-
 export type DownloadsState = 'in_progress' | 'interrupted' | 'complete';
 
 export interface Events {
-  Rule: {
-    id?: string;
-    tags?: string[];
-    priority?: number;
-  };
   Event: {
     addListener: sinon.SinonStub;
-    removeListener: sinon.SinonStub;
-    hasListener: sinon.SinonStub;
-    hasListeners: sinon.SinonStub;
     addRules?: sinon.SinonStub;
     getRules?: sinon.SinonStub;
+    hasListener: sinon.SinonStub;
+    hasListeners: sinon.SinonStub;
+    removeListener: sinon.SinonStub;
     removeRules?: sinon.SinonStub;
+  };
+  Rule: {
+    actions: any[];
+    conditions: any[];
+    id?: string;
+    priority?: number;
+    tags?: string[];
   };
   UrlFilter: {
     hostContains?: string;
     hostEquals?: string;
     hostPrefix?: string;
     hostSuffix?: string;
+    originAndPathMatches?: string;
     pathContains?: string;
     pathEquals?: string;
     pathPrefix?: string;
     pathSuffix?: string;
+    ports?: any[];
     queryContains?: string;
     queryEquals?: string;
     queryPrefix?: string;
     querySuffix?: string;
+    schemes?: string[];
     urlContains?: string;
     urlEquals?: string;
     urlMatches?: string;
-    originAndPathMatches?: string;
     urlPrefix?: string;
     urlSuffix?: string;
-    schemes?: string[];
   };
 }
 
 export interface Experiments {
-  ExperimentAPI: {};
-  ExperimentURL: string[];
-  APIEvent: ExperimentsAPIEvent[];
-  APIParentScope: ExperimentsAPIParentScope[];
-  APIChildScope: ExperimentsAPIChildScope[];
+  APIChildScope: ExperimentsAPIChildScope;
+  APIEvent: ExperimentsAPIEvent;
+  APIEvents: Experiments['APIEvent'][];
+  APIParentScope: ExperimentsAPIParentScope;
+  APIPath: string[];
+  APIPaths: Experiments['APIPath'][];
+  ExperimentAPI: {
+    child?: {
+      paths: Experiments['APIPaths'];
+      scopes: Experiments['APIChildScope'][];
+      script: Experiments['ExperimentURL'];
+    };
+    parent?: {
+      events?: Experiments['APIEvents'];
+      paths?: Experiments['APIPaths'];
+      scopes?: Experiments['APIParentScope'][];
+      script: Experiments['ExperimentURL'];
+    };
+    schema: Experiments['ExperimentURL'];
+  };
+  ExperimentURL: string;
 }
+
+export type ExperimentsAPIChildScope =
+  | 'addon_child'
+  | 'content_child'
+  | 'devtools_child';
 
 export type ExperimentsAPIEvent = 'startup';
 
@@ -584,43 +624,45 @@ export type ExperimentsAPIParentScope =
   | 'content_parent'
   | 'devtools_parent';
 
-export type ExperimentsAPIChildScope =
-  | 'addon_child'
-  | 'content_child'
-  | 'devtools_child';
-
 export interface Extension {
+  ViewType: ExtensionViewType;
+  getBackgroundPage: sinon.SinonStub;
   getURL: sinon.SinonStub;
   getViews: sinon.SinonStub;
-  getBackgroundPage: sinon.SinonStub;
-  isAllowedIncognitoAccess: sinon.SinonStub;
+  inIncognitoContext?: boolean;
   isAllowedFileSchemeAccess: sinon.SinonStub;
-  setUpdateUrlData?: sinon.SinonStub;
-  onRequest?: SinonEventStub;
-  onRequestExternal?: SinonEventStub;
-  ViewType: ExtensionViewType[];
-  lastError: {
+  isAllowedIncognitoAccess: sinon.SinonStub;
+  lastError?: {
     message: string;
   };
+  onRequest: Events['Event'];
+  onRequestExternal: Events['Event'];
+  setUpdateUrlData?: sinon.SinonStub;
 }
-
-export type ExtensionViewType = 'tab' | 'popup' | 'sidebar';
 
 export interface ExtensionTypes {
-  ImageFormat: ExtensionTypesImageFormat[];
+  CSSOrigin: ExtensionTypesCSSOrigin;
+  Date: any;
+  ExtensionFileOrCode: any;
   ImageDetails: {
+    format?: ExtensionTypes['ImageFormat'];
     quality?: number;
   };
-  RunAt: ExtensionTypesRunAt[];
-  CSSOrigin: ExtensionTypesCSSOrigin[];
+  ImageFormat: ExtensionTypesImageFormat;
   InjectDetails: {
-    code?: string;
-    file?: string;
     allFrames?: boolean;
-    matchAboutBlank?: boolean;
+    code?: string;
+    cssOrigin?: ExtensionTypes['CSSOrigin'];
+    file?: string;
     frameId?: number;
+    matchAboutBlank?: boolean;
+    runAt?: ExtensionTypes['RunAt'];
   };
+  PlainJSONValue: any;
+  RunAt: ExtensionTypesRunAt;
 }
+
+export type ExtensionTypesCSSOrigin = 'user' | 'author';
 
 export type ExtensionTypesImageFormat = 'jpeg' | 'png';
 
@@ -629,7 +671,7 @@ export type ExtensionTypesRunAt =
   | 'document_end'
   | 'document_idle';
 
-export type ExtensionTypesCSSOrigin = 'user' | 'author';
+export type ExtensionViewType = 'tab' | 'popup' | 'sidebar';
 
 export interface Find {
   find: sinon.SinonStub;
@@ -638,18 +680,18 @@ export interface Find {
 }
 
 export interface GeckoProfiler {
-  start: sinon.SinonStub;
-  stop: sinon.SinonStub;
-  pause: sinon.SinonStub;
-  resume: sinon.SinonStub;
+  ProfilerFeature: GeckoProfilerProfilerFeature;
+  Supports: GeckoProfilerSupports;
   dumpProfileToFile: sinon.SinonStub;
   getProfile: sinon.SinonStub;
   getProfileAsArrayBuffer: sinon.SinonStub;
   getProfileAsGzippedArrayBuffer: sinon.SinonStub;
   getSymbols: sinon.SinonStub;
-  onRunning: SinonEventStub;
-  ProfilerFeature: GeckoProfilerProfilerFeature[];
-  supports: GeckoProfilerSupports[];
+  onRunning: Events['Event'];
+  pause: sinon.SinonStub;
+  resume: sinon.SinonStub;
+  start: sinon.SinonStub;
+  stop: sinon.SinonStub;
 }
 
 export type GeckoProfilerProfilerFeature =
@@ -672,28 +714,31 @@ export type GeckoProfilerProfilerFeature =
 export type GeckoProfilerSupports = 'windowLength';
 
 export interface History {
-  search: sinon.SinonStub;
-  getVisits: sinon.SinonStub;
-  addUrl: sinon.SinonStub;
-  deleteUrl: sinon.SinonStub;
-  deleteRange: sinon.SinonStub;
-  deleteAll: sinon.SinonStub;
-  onVisited: SinonEventStub;
-  onVisitRemoved: SinonEventStub;
-  onTitleChanged: SinonEventStub;
-  TransitionType: HistoryTransitionType[];
   HistoryItem: {
     id: string;
-    url?: string;
+    lastVisitTime?: number;
     title?: string;
-    visitCount?: number;
     typedCount?: number;
+    url?: string;
+    visitCount?: number;
   };
+  TransitionType: HistoryTransitionType;
   VisitItem: {
     id: string;
-    visitId: string;
     referringVisitId: string;
+    transition: History['TransitionType'];
+    visitId: string;
+    visitTime?: number;
   };
+  addUrl: sinon.SinonStub;
+  deleteAll: sinon.SinonStub;
+  deleteRange: sinon.SinonStub;
+  deleteUrl: sinon.SinonStub;
+  getVisits: sinon.SinonStub;
+  onTitleChanged: Events['Event'];
+  onVisitRemoved: Events['Event'];
+  onVisited: Events['Event'];
+  search: sinon.SinonStub;
 }
 
 export type HistoryTransitionType =
@@ -710,75 +755,77 @@ export type HistoryTransitionType =
   | 'keyword_generated';
 
 export interface I18n {
+  LanguageCode: string;
+  detectLanguage: sinon.SinonStub;
   getAcceptLanguages: sinon.SinonStub;
   getMessage: sinon.SinonStub;
   getUILanguage: sinon.SinonStub;
-  detectLanguage: sinon.SinonStub;
-  LanguageCode: string[];
 }
 
 export interface Identity {
-  getAccounts?: sinon.SinonStub;
-  getAuthToken?: sinon.SinonStub;
-  getProfileUserInfo?: sinon.SinonStub;
-  removeCachedAuthToken?: sinon.SinonStub;
-  launchWebAuthFlow: sinon.SinonStub;
-  getRedirectURL: sinon.SinonStub;
-  onSignInChanged?: SinonEventStub;
   AccountInfo: {
     id: string;
   };
+  getAccounts?: sinon.SinonStub;
+  getAuthToken?: sinon.SinonStub;
+  getProfileUserInfo?: sinon.SinonStub;
+  getRedirectURL: sinon.SinonStub;
+  launchWebAuthFlow: sinon.SinonStub;
+  onSignInChanged: Events['Event'];
+  removeCachedAuthToken?: sinon.SinonStub;
 }
 
 export interface Idle {
+  IdleState: IdleIdleState;
+  onStateChanged: Events['Event'];
   queryState: sinon.SinonStub;
   setDetectionInterval: sinon.SinonStub;
-  onStateChanged: SinonEventStub;
-  IdleState: IdleIdleState[];
 }
 
 export type IdleIdleState = 'active' | 'idle';
 
 export interface Management {
-  getAll: sinon.SinonStub;
-  get: sinon.SinonStub;
-  install: sinon.SinonStub;
-  getSelf: sinon.SinonStub;
-  uninstallSelf: sinon.SinonStub;
-  setEnabled: sinon.SinonStub;
-  onDisabled: SinonEventStub;
-  onEnabled: SinonEventStub;
-  onInstalled: SinonEventStub;
-  onUninstalled: SinonEventStub;
+  ExtensionDisabledReason: ManagementExtensionDisabledReason;
+  ExtensionInfo: {
+    description: string;
+    disabledReason?: Management['ExtensionDisabledReason'];
+    enabled: boolean;
+    homepageUrl?: string;
+    hostPermissions?: string[];
+    icons?: Management['IconInfo'][];
+    id: string;
+    installType: Management['ExtensionInstallType'];
+    mayDisable: boolean;
+    name: string;
+    optionsUrl: string;
+    permissions?: string[];
+    shortName?: string;
+    type: Management['ExtensionType'];
+    updateUrl?: string;
+    version: string;
+    versionName?: string;
+  };
+  ExtensionInstallType: ManagementExtensionInstallType;
+  ExtensionType: ManagementExtensionType;
   IconInfo: {
     size: number;
     url: string;
   };
-  ExtensionDisabledReason: ManagementExtensionDisabledReason[];
-  ExtensionType: ManagementExtensionType[];
-  ExtensionInstallType: ManagementExtensionInstallType[];
-  ExtensionInfo: {
-    id: string;
-    name: string;
-    shortName?: string;
-    description: string;
-    version: string;
-    versionName?: string;
-    mayDisable: boolean;
-    enabled: boolean;
-    homepageUrl?: string;
-    updateUrl?: string;
-    optionsUrl: string;
-    permissions?: string[];
-    hostPermissions?: string[];
-  };
+  get: sinon.SinonStub;
+  getAll: sinon.SinonStub;
+  getSelf: sinon.SinonStub;
+  install: sinon.SinonStub;
+  onDisabled: Events['Event'];
+  onEnabled: Events['Event'];
+  onInstalled: Events['Event'];
+  onUninstalled: Events['Event'];
+  setEnabled: sinon.SinonStub;
+  uninstallSelf: sinon.SinonStub;
 }
 
 export type ManagementExtensionDisabledReason =
   | 'unknown'
   | 'permissions_increase';
-
-export type ManagementExtensionType = 'extension' | 'theme';
 
 export type ManagementExtensionInstallType =
   | 'development'
@@ -786,37 +833,186 @@ export type ManagementExtensionInstallType =
   | 'sideload'
   | 'other';
 
+export type ManagementExtensionType = 'extension' | 'theme';
+
+export interface Manifest {
+  ContentScript: {
+    all_frames?: boolean;
+    css?: Manifest['ExtensionURL'][];
+    exclude_globs?: string[];
+    exclude_matches?: Manifest['MatchPattern'][];
+    include_globs?: string[];
+    js?: Manifest['ExtensionURL'][];
+    match_about_blank?: boolean;
+    matches: Manifest['MatchPattern'][];
+    run_at?: ExtensionTypes['RunAt'];
+  };
+  ExtensionFileUrl: string;
+  ExtensionID: any;
+  ExtensionURL: string;
+  FirefoxSpecificProperties: {
+    id?: Manifest['ExtensionID'];
+    strict_max_version?: string;
+    strict_min_version?: string;
+    update_url?: string;
+  };
+  HttpURL: string;
+  IconImageData: any;
+  IconPath: any;
+  ImageData: {};
+  ImageDataOrExtensionURL: string;
+  KeyName: string;
+  ManifestBase: {
+    applications?: {
+      gecko?: Manifest['FirefoxSpecificProperties'];
+    };
+    author?: string;
+    browser_specific_settings?: {
+      edge?: {};
+      gecko?: Manifest['FirefoxSpecificProperties'];
+    };
+    description?: string;
+    homepage_url?: string;
+    manifest_version: number;
+    name: string;
+    short_name?: string;
+    version: string;
+  };
+  MatchPattern: any;
+  MatchPatternRestricted: any;
+  MatchPatternUnestricted: any;
+  NativeManifest: any;
+  OptionalPermission: any;
+  OptionalPermissionOrOrigin: any;
+  Permission: any;
+  PermissionOrOrigin: any;
+  PersistentBackgroundProperty: any;
+  ProtocolHandler: {
+    name: string;
+    protocol: any;
+    uriTemplate: any;
+  };
+  ThemeColor: any;
+  ThemeExperiment: {
+    colors?: {};
+    images?: {};
+    properties?: {};
+    stylesheet?: Manifest['ExtensionURL'];
+  };
+  ThemeIcons: {
+    dark: Manifest['ExtensionURL'];
+    light: Manifest['ExtensionURL'];
+    size: number;
+  };
+  ThemeType: {
+    colors?: {
+      accentcolor?: Manifest['ThemeColor'];
+      bookmark_text?: Manifest['ThemeColor'];
+      button_background_active?: Manifest['ThemeColor'];
+      button_background_hover?: Manifest['ThemeColor'];
+      frame?: Manifest['ThemeColor'];
+      frame_inactive?: Manifest['ThemeColor'];
+      icons?: Manifest['ThemeColor'];
+      icons_attention?: Manifest['ThemeColor'];
+      ntp_background?: Manifest['ThemeColor'];
+      ntp_text?: Manifest['ThemeColor'];
+      popup?: Manifest['ThemeColor'];
+      popup_border?: Manifest['ThemeColor'];
+      popup_highlight?: Manifest['ThemeColor'];
+      popup_highlight_text?: Manifest['ThemeColor'];
+      popup_text?: Manifest['ThemeColor'];
+      sidebar?: Manifest['ThemeColor'];
+      sidebar_border?: Manifest['ThemeColor'];
+      sidebar_highlight?: Manifest['ThemeColor'];
+      sidebar_highlight_text?: Manifest['ThemeColor'];
+      sidebar_text?: Manifest['ThemeColor'];
+      tab_background_separator?: Manifest['ThemeColor'];
+      tab_background_text?: Manifest['ThemeColor'];
+      tab_line?: Manifest['ThemeColor'];
+      tab_loading?: Manifest['ThemeColor'];
+      tab_selected?: Manifest['ThemeColor'];
+      tab_text?: Manifest['ThemeColor'];
+      textcolor?: Manifest['ThemeColor'];
+      toolbar?: Manifest['ThemeColor'];
+      toolbar_bottom_separator?: Manifest['ThemeColor'];
+      toolbar_field?: Manifest['ThemeColor'];
+      toolbar_field_border?: Manifest['ThemeColor'];
+      toolbar_field_border_focus?: Manifest['ThemeColor'];
+      toolbar_field_focus?: Manifest['ThemeColor'];
+      toolbar_field_highlight?: Manifest['ThemeColor'];
+      toolbar_field_highlight_text?: Manifest['ThemeColor'];
+      toolbar_field_separator?: Manifest['ThemeColor'];
+      toolbar_field_text?: Manifest['ThemeColor'];
+      toolbar_field_text_focus?: Manifest['ThemeColor'];
+      toolbar_text?: Manifest['ThemeColor'];
+      toolbar_top_separator?: Manifest['ThemeColor'];
+      toolbar_vertical_separator?: Manifest['ThemeColor'];
+    };
+    images?: {
+      additional_backgrounds?: Manifest['ImageDataOrExtensionURL'][];
+      headerURL?: Manifest['ImageDataOrExtensionURL'];
+      theme_frame?: Manifest['ImageDataOrExtensionURL'];
+    };
+    properties?: {
+      additional_backgrounds_alignment?:
+        | 'bottom'
+        | 'center'
+        | 'left'
+        | 'right'
+        | 'top'
+        | 'center bottom'
+        | 'center center'
+        | 'center top'
+        | 'left bottom'
+        | 'left center'
+        | 'left top'
+        | 'right bottom'
+        | 'right center'
+        | 'right top'[];
+      additional_backgrounds_tiling?:
+        | 'no-repeat'
+        | 'repeat'
+        | 'repeat-x'
+        | 'repeat-y'[];
+    };
+  };
+  UnrecognizedProperty: any;
+}
+
 export interface Menus {
-  create: sinon.SinonStub;
-  update: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  removeAll: sinon.SinonStub;
-  overrideContext: sinon.SinonStub;
-  refresh: sinon.SinonStub;
-  onClicked: SinonEventStub;
-  onShown: SinonEventStub;
-  onHidden: SinonEventStub;
-  ContextType: MenusContextType[];
-  ItemType: MenusItemType[];
+  ACTION_MENU_TOP_LEVEL_LIMIT: 6;
+  ContextType: MenusContextType;
+  ItemType: MenusItemType;
   OnClickData: {
-    mediaType?: string;
-    linkText?: string;
-    linkUrl?: string;
-    srcUrl?: string;
-    pageUrl?: string;
+    bookmarkId: string;
+    button?: number;
+    checked?: boolean;
+    editable: boolean;
     frameId?: number;
     frameUrl?: string;
+    linkText?: string;
+    linkUrl?: string;
+    mediaType?: string;
+    menuItemId: any;
+    modifiers: 'Shift' | 'Alt' | 'Command' | 'Ctrl' | 'MacCtrl'[];
+    pageUrl?: string;
+    parentMenuItemId?: any;
     selectionText?: string;
-    editable: boolean;
-    wasChecked?: boolean;
-    checked?: boolean;
-    bookmarkId: string;
-    modifiers: MenusModifiers[];
-    button?: number;
+    srcUrl?: string;
     targetElementId?: number;
+    viewType?: Extension['ViewType'];
+    wasChecked?: boolean;
   };
-  ACTION_MENU_TOP_LEVEL_LIMIT: 6;
+  create: sinon.SinonStub;
   getTargetElement: sinon.SinonStub;
+  onClicked: Events['Event'];
+  onHidden: Events['Event'];
+  onShown: Events['Event'];
+  overrideContext: sinon.SinonStub;
+  refresh: sinon.SinonStub;
+  remove: sinon.SinonStub;
+  removeAll: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
 export type MenusContextType =
@@ -839,100 +1035,140 @@ export type MenusContextType =
 
 export type MenusItemType = 'normal' | 'checkbox' | 'radio' | 'separator';
 
-export type MenusModifiers = 'Shift' | 'Alt' | 'Command' | 'Ctrl' | 'MacCtrl';
-
 export interface NetworkStatus {
-  getLinkInfo: sinon.SinonStub;
-  onConnectionChanged: SinonEventStub;
   NetworkLinkInfo: {
-    status: string;
-    type: string;
     id?: string;
+    status: 'unknown' | 'up' | 'down';
+    type:
+      | 'unknown'
+      | 'ethernet'
+      | 'usb'
+      | 'wifi'
+      | 'wimax'
+      | '2g'
+      | '3g'
+      | '4g';
   };
+  getLinkInfo: sinon.SinonStub;
+  onConnectionChanged: Events['Event'];
 }
 
 export interface NormandyAddonStudy {
-  getStudy: sinon.SinonStub;
-  endStudy: sinon.SinonStub;
-  getClientMetadata: sinon.SinonStub;
-  onUnenroll: SinonEventStub;
   Study: {
-    recipeId: number;
-    slug: string;
-    userFacingName: string;
-    userFacingDescription: string;
-    branch: string;
     active: boolean;
     addonId: string;
     addonUrl: string;
     addonVersion: string;
+    branch: string;
     extensionApiId: number;
     extensionHash: string;
     extensionHashAlgorithm: string;
+    recipeId: number;
+    slug: string;
+    studyEndDate: ExtensionTypes['Date'];
+    studyStartDate: ExtensionTypes['Date'];
+    userFacingDescription: string;
+    userFacingName: string;
   };
+  endStudy: sinon.SinonStub;
+  getClientMetadata: sinon.SinonStub;
+  getStudy: sinon.SinonStub;
+  onUnenroll: Events['Event'];
 }
 
 export interface Notifications {
-  create: sinon.SinonStub;
-  update?: sinon.SinonStub;
+  CreateNotificationOptions: {
+    appIconMaskUrl?: string;
+    buttons?: {
+      iconUrl?: string;
+      title: string;
+    }[];
+    contextMessage?: string;
+    eventTime?: number;
+    iconUrl?: string;
+    imageUrl?: string;
+    isClickable?: boolean;
+    items?: Notifications['NotificationItem'][];
+    message: string;
+    priority?: number;
+    progress?: number;
+    title: string;
+    type: Notifications['TemplateType'];
+  };
+  NotificationItem: {
+    message: string;
+    title: string;
+  };
+  PermissionLevel: NotificationsPermissionLevel;
+  TemplateType: NotificationsTemplateType;
+  UpdateNotificationOptions: {
+    appIconMaskUrl?: string;
+    buttons?: {
+      iconUrl?: string;
+      title: string;
+    }[];
+    contextMessage?: string;
+    eventTime?: number;
+    iconUrl?: string;
+    imageUrl?: string;
+    isClickable?: boolean;
+    items?: Notifications['NotificationItem'][];
+    message?: string;
+    priority?: number;
+    progress?: number;
+    title?: string;
+    type?: Notifications['TemplateType'];
+  };
   clear: sinon.SinonStub;
+  create: sinon.SinonStub;
   getAll: sinon.SinonStub;
   getPermissionLevel?: sinon.SinonStub;
-  onClosed: SinonEventStub;
-  onClicked: SinonEventStub;
-  onButtonClicked: SinonEventStub;
-  onPermissionLevelChanged?: SinonEventStub;
-  onShowSettings?: SinonEventStub;
-  onShown: SinonEventStub;
-  TemplateType: NotificationsTemplateType[];
-  PermissionLevel: NotificationsPermissionLevel[];
-  NotificationItem: {
-    title: string;
-    message: string;
-  };
-  CreateNotificationOptions: {
-    iconUrl?: string;
-    appIconMaskUrl?: string;
-    title: string;
-    message: string;
-    contextMessage?: string;
-    priority?: number;
-    imageUrl?: string;
-    progress?: number;
-    isClickable?: boolean;
-  };
-  UpdateNotificationOptions: {
-    iconUrl?: string;
-    appIconMaskUrl?: string;
-    title?: string;
-    message?: string;
-    contextMessage?: string;
-    priority?: number;
-    imageUrl?: string;
-    progress?: number;
-    isClickable?: boolean;
-  };
+  onButtonClicked: Events['Event'];
+  onClicked: Events['Event'];
+  onClosed: Events['Event'];
+  onPermissionLevelChanged: Events['Event'];
+  onShowSettings: Events['Event'];
+  onShown: Events['Event'];
+  update?: sinon.SinonStub;
 }
-
-export type NotificationsTemplateType = 'basic' | 'image' | 'list' | 'progress';
 
 export type NotificationsPermissionLevel = 'granted' | 'denied';
 
+export type NotificationsTemplateType = 'basic' | 'image' | 'list' | 'progress';
+
 export interface Omnibox {
-  setDefaultSuggestion: sinon.SinonStub;
-  onInputStarted: SinonEventStub;
-  onInputChanged: SinonEventStub;
-  onInputEntered: SinonEventStub;
-  onInputCancelled: SinonEventStub;
-  DescriptionStyleType: OmniboxDescriptionStyleType[];
-  OnInputEnteredDisposition: OmniboxOnInputEnteredDisposition[];
+  DefaultSuggestResult: {
+    description: string;
+    descriptionStyles?: {
+      length?: number;
+      offset: number;
+      type: Omnibox['DescriptionStyleType'];
+    }[];
+    descriptionStylesRaw?: {
+      offset: number;
+      type: number;
+    }[];
+  };
+  DescriptionStyleType: OmniboxDescriptionStyleType;
+  OnInputEnteredDisposition: OmniboxOnInputEnteredDisposition;
   SuggestResult: {
     content: string;
     description: string;
+    descriptionStyles?: {
+      length?: number;
+      offset: number;
+      type: Omnibox['DescriptionStyleType'];
+    }[];
+    descriptionStylesRaw?: {
+      offset: number;
+      type: number;
+    }[];
   };
-  DefaultSuggestResult: {
-    description: string;
-  };
+  onInputCancelled: Events['Event'];
+  onInputChanged: Events['Event'];
+  onInputEntered: Events['Event'];
+  onInputStarted: Events['Event'];
+  setDefaultSuggestion: sinon.SinonStub;
 }
 
 export type OmniboxDescriptionStyleType = 'url' | 'match' | 'dim';
@@ -943,35 +1179,41 @@ export type OmniboxOnInputEnteredDisposition =
   | 'newBackgroundTab';
 
 export interface PageAction {
-  show: sinon.SinonStub;
+  ImageDataType: {};
+  getPopup: sinon.SinonStub;
+  getTitle: sinon.SinonStub;
   hide: sinon.SinonStub;
   isShown: sinon.SinonStub;
-  setTitle: sinon.SinonStub;
-  getTitle: sinon.SinonStub;
+  onClicked: Events['Event'];
+  openPopup: sinon.SinonStub;
   setIcon: sinon.SinonStub;
   setPopup: sinon.SinonStub;
-  getPopup: sinon.SinonStub;
-  openPopup: sinon.SinonStub;
-  onClicked: SinonEventStub;
-  ImageDataType: {};
+  setTitle: sinon.SinonStub;
+  show: sinon.SinonStub;
 }
 
 export interface Permissions {
-  getAll: sinon.SinonStub;
+  AnyPermissions: {
+    origins?: Manifest['MatchPattern'][];
+    permissions?: Manifest['Permission'][];
+  };
+  Permissions: {
+    origins?: Manifest['MatchPattern'][];
+    permissions?: Manifest['OptionalPermission'][];
+  };
   contains: sinon.SinonStub;
-  request: sinon.SinonStub;
+  getAll: sinon.SinonStub;
+  onAdded: Events['Event'];
+  onRemoved: Events['Event'];
   remove: sinon.SinonStub;
-  onAdded?: SinonEventStub;
-  onRemoved?: SinonEventStub;
-  Permissions: {};
-  AnyPermissions: {};
+  request: sinon.SinonStub;
 }
 
 export interface Pkcs11 {
-  isModuleInstalled: sinon.SinonStub;
-  installModule: sinon.SinonStub;
-  uninstallModule: sinon.SinonStub;
   getModuleSlots: sinon.SinonStub;
+  installModule: sinon.SinonStub;
+  isModuleInstalled: sinon.SinonStub;
+  uninstallModule: sinon.SinonStub;
 }
 
 export interface Privacy {
@@ -981,7 +1223,7 @@ export interface Privacy {
 }
 
 export interface PrivacyNetwork {
-  IPHandlingPolicy: PrivacyNetworkIPHandlingPolicy[];
+  IPHandlingPolicy: PrivacyNetworkIPHandlingPolicy;
   networkPredictionEnabled: Types['Setting'];
   peerConnectionEnabled: Types['Setting'];
   webRTCIPHandlingPolicy: Types['Setting'];
@@ -999,19 +1241,24 @@ export interface PrivacyServices {
 }
 
 export interface PrivacyWebsites {
-  TrackingProtectionModeOption: PrivacyWebsitesTrackingProtectionModeOption[];
   CookieConfig: {
-    behavior?: string;
+    behavior?:
+      | 'allow_all'
+      | 'reject_all'
+      | 'reject_third_party'
+      | 'allow_visited'
+      | 'reject_trackers';
     nonPersistentCookies?: boolean;
   };
-  thirdPartyCookiesAllowed: Types['Setting'];
+  TrackingProtectionModeOption: PrivacyWebsitesTrackingProtectionModeOption;
+  cookieConfig: Types['Setting'];
+  firstPartyIsolate: Types['Setting'];
   hyperlinkAuditingEnabled: Types['Setting'];
+  protectedContentEnabled?: Types['Setting'];
   referrersEnabled: Types['Setting'];
   resistFingerprinting: Types['Setting'];
-  firstPartyIsolate: Types['Setting'];
-  protectedContentEnabled: Types['Setting'];
+  thirdPartyCookiesAllowed?: Types['Setting'];
   trackingProtectionMode: Types['Setting'];
-  cookieConfig: Types['Setting'];
 }
 
 export type PrivacyWebsitesTrackingProtectionModeOption =
@@ -1020,81 +1267,100 @@ export type PrivacyWebsitesTrackingProtectionModeOption =
   | 'private_browsing';
 
 export interface Proxy {
-  register: sinon.SinonStub;
-  unregister: sinon.SinonStub;
-  registerProxyScript: sinon.SinonStub;
-  onRequest: SinonEventStub;
-  onError: SinonEventStub;
-  onProxyError: SinonEventStub;
   ProxyConfig: {
-    proxyType?: string;
-    http?: string;
-    httpProxyAll?: boolean;
-    ftp?: string;
-    ssl?: string;
-    socks?: string;
-    socksVersion?: number;
-    passthrough?: string;
     autoConfigUrl?: string;
     autoLogin?: boolean;
+    ftp?: string;
+    http?: string;
+    httpProxyAll?: boolean;
+    passthrough?: string;
     proxyDNS?: boolean;
+    proxyType?: 'none' | 'autoDetect' | 'system' | 'manual' | 'autoConfig';
+    socks?: string;
+    socksVersion?: number;
+    ssl?: string;
   };
+  onError: Events['Event'];
+  onProxyError: Events['Event'];
+  onRequest: Events['Event'];
+  register: sinon.SinonStub;
+  registerProxyScript: sinon.SinonStub;
   settings: Types['Setting'];
+  unregister: sinon.SinonStub;
 }
 
 export interface Runtime {
-  getBackgroundPage: sinon.SinonStub;
-  openOptionsPage: sinon.SinonStub;
-  getManifest: sinon.SinonStub;
-  getURL: sinon.SinonStub;
-  setUninstallURL: sinon.SinonStub;
-  reload: sinon.SinonStub;
-  requestUpdateCheck?: sinon.SinonStub;
-  restart?: sinon.SinonStub;
-  connect: sinon.SinonStub;
-  connectNative: sinon.SinonStub;
-  sendMessage: sinon.SinonStub;
-  sendNativeMessage: sinon.SinonStub;
-  getBrowserInfo: sinon.SinonStub;
-  getPlatformInfo: sinon.SinonStub;
-  getPackageDirectoryEntry?: sinon.SinonStub;
-  onStartup: SinonEventStub;
-  onInstalled: SinonEventStub;
-  onSuspend?: SinonEventStub;
-  onSuspendCanceled?: SinonEventStub;
-  onUpdateAvailable: SinonEventStub;
-  onBrowserUpdateAvailable?: SinonEventStub;
-  onConnect: SinonEventStub;
-  onConnectExternal: SinonEventStub;
-  onMessage: SinonEventStub;
-  onMessageExternal: SinonEventStub;
-  onRestartRequired?: SinonEventStub;
-  Port: {
+  BrowserInfo: {
+    buildID: string;
     name: string;
+    vendor: string;
+    version: string;
   };
   MessageSender: {
     frameId?: number;
     id?: string;
-    url?: string;
+    tab?: Tabs['Tab'];
     tlsChannelId?: string;
+    url?: string;
   };
-  PlatformOs: RuntimePlatformOs[];
-  PlatformArch: RuntimePlatformArch[];
-  PlatformInfo: {};
-  BrowserInfo: {
+  OnInstalledReason: RuntimeOnInstalledReason;
+  OnRestartRequiredReason: RuntimeOnRestartRequiredReason;
+  PlatformArch: RuntimePlatformArch;
+  PlatformInfo: {
+    arch: Runtime['PlatformArch'];
+    nacl_arch?: any;
+    os: Runtime['PlatformOs'];
+  };
+  PlatformOs: RuntimePlatformOs;
+  Port: {
+    disconnect: sinon.SinonStub;
     name: string;
-    vendor: string;
-    version: string;
-    buildID: string;
+    onDisconnect: Events['Event'];
+    onMessage: Events['Event'];
+    postMessage: sinon.SinonStub;
+    sender?: Runtime['MessageSender'];
   };
-  RequestUpdateCheckStatus: RuntimeRequestUpdateCheckStatus[];
-  OnInstalledReason: RuntimeOnInstalledReason[];
-  OnRestartRequiredReason: RuntimeOnRestartRequiredReason[];
-  lastError: {
+  RequestUpdateCheckStatus: RuntimeRequestUpdateCheckStatus;
+  connect: sinon.SinonStub<any[], Runtime['Port']>;
+  connectNative: sinon.SinonStub<any[], Runtime['Port']>;
+  getBackgroundPage: sinon.SinonStub;
+  getBrowserInfo: sinon.SinonStub;
+  getManifest: sinon.SinonStub;
+  getPackageDirectoryEntry?: sinon.SinonStub;
+  getPlatformInfo: sinon.SinonStub;
+  getURL: sinon.SinonStub;
+  id: string;
+  lastError?: {
     message?: string;
   };
-  id: string[];
+  onBrowserUpdateAvailable: Events['Event'];
+  onConnect: Events['Event'];
+  onConnectExternal: Events['Event'];
+  onInstalled: Events['Event'];
+  onMessage: Events['Event'];
+  onMessageExternal: Events['Event'];
+  onRestartRequired: Events['Event'];
+  onStartup: Events['Event'];
+  onSuspend: Events['Event'];
+  onSuspendCanceled: Events['Event'];
+  onUpdateAvailable: Events['Event'];
+  openOptionsPage: sinon.SinonStub;
+  reload: sinon.SinonStub;
+  requestUpdateCheck?: sinon.SinonStub;
+  restart?: sinon.SinonStub;
+  sendMessage: sinon.SinonStub;
+  sendNativeMessage: sinon.SinonStub;
+  setUninstallURL: sinon.SinonStub;
 }
+
+export type RuntimeOnInstalledReason = 'install' | 'update' | 'browser_update';
+
+export type RuntimeOnRestartRequiredReason =
+  | 'app_update'
+  | 'os_update'
+  | 'periodic';
+
+export type RuntimePlatformArch = 'arm' | 'x86-32' | 'x86-64';
 
 export type RuntimePlatformOs =
   | 'mac'
@@ -1104,207 +1370,214 @@ export type RuntimePlatformOs =
   | 'linux'
   | 'openbsd';
 
-export type RuntimePlatformArch = 'arm' | 'x86-32' | 'x86-64';
-
 export type RuntimeRequestUpdateCheckStatus =
   | 'throttled'
   | 'no_update'
   | 'update_available';
 
-export type RuntimeOnInstalledReason = 'install' | 'update' | 'browser_update';
-
-export type RuntimeOnRestartRequiredReason =
-  | 'app_update'
-  | 'os_update'
-  | 'periodic';
-
 export interface Search {
-  get: sinon.SinonStub;
-  search: sinon.SinonStub;
   SearchEngine: {
-    name: string;
-    isDefault: boolean;
     alias?: string;
     favIconUrl?: string;
+    isDefault: boolean;
+    name: string;
   };
+  get: sinon.SinonStub;
+  search: sinon.SinonStub;
 }
 
 export interface Sessions {
-  forgetClosedTab: sinon.SinonStub;
-  forgetClosedWindow: sinon.SinonStub;
-  getRecentlyClosed: sinon.SinonStub;
-  getDevices?: sinon.SinonStub;
-  restore: sinon.SinonStub;
-  setTabValue: sinon.SinonStub;
-  getTabValue: sinon.SinonStub;
-  removeTabValue: sinon.SinonStub;
-  setWindowValue: sinon.SinonStub;
-  getWindowValue: sinon.SinonStub;
-  removeWindowValue: sinon.SinonStub;
-  onChanged: SinonEventStub;
+  Device: {
+    deviceName: string;
+    info: string;
+    sessions: Sessions['Session'][];
+  };
   Filter: {
     maxResults?: number;
   };
+  MAX_SESSION_RESULTS: 25;
   Session: {
     lastModified: number;
+    tab?: Tabs['Tab'];
+    window?: Windows['Window'];
   };
-  Device: {
-    info: string;
-    deviceName: string;
-  };
-  MAX_SESSION_RESULTS: 25;
+  forgetClosedTab: sinon.SinonStub;
+  forgetClosedWindow: sinon.SinonStub;
+  getDevices?: sinon.SinonStub;
+  getRecentlyClosed: sinon.SinonStub;
+  getTabValue: sinon.SinonStub;
+  getWindowValue: sinon.SinonStub;
+  onChanged: Events['Event'];
+  removeTabValue: sinon.SinonStub;
+  removeWindowValue: sinon.SinonStub;
+  restore: sinon.SinonStub;
+  setTabValue: sinon.SinonStub;
+  setWindowValue: sinon.SinonStub;
 }
 
 export interface SidebarAction {
-  setTitle: sinon.SinonStub;
+  ImageDataType: {};
+  close: sinon.SinonStub;
+  getPanel: sinon.SinonStub;
   getTitle: sinon.SinonStub;
+  isOpen: sinon.SinonStub;
+  open: sinon.SinonStub;
   setIcon: sinon.SinonStub;
   setPanel: sinon.SinonStub;
-  getPanel: sinon.SinonStub;
-  open: sinon.SinonStub;
-  close: sinon.SinonStub;
-  isOpen: sinon.SinonStub;
-  ImageDataType: {};
+  setTitle: sinon.SinonStub;
 }
 
 export interface Storage {
-  onChanged: SinonEventStub;
-  StorageChange: {
-    oldValue?: any;
-    newValue?: any;
-  };
   StorageArea: {
+    clear: sinon.SinonStub;
     get: sinon.SinonStub;
     getBytesInUse?: sinon.SinonStub;
-    set: sinon.SinonStub;
     remove: sinon.SinonStub;
-    clear: sinon.SinonStub;
+    set: sinon.SinonStub;
   };
-  sync: Storage['StorageArea'];
+  StorageChange: {
+    newValue?: any;
+    oldValue?: any;
+  };
   local: Storage['StorageArea'];
   managed: Storage['StorageArea'];
+  onChanged: Events['Event'];
+  sync: Storage['StorageArea'];
 }
 
 export interface Tabs {
-  get: sinon.SinonStub;
-  getCurrent: sinon.SinonStub;
-  connect: sinon.SinonStub;
-  sendRequest?: sinon.SinonStub;
-  sendMessage: sinon.SinonStub;
-  getSelected?: sinon.SinonStub;
-  getAllInWindow?: sinon.SinonStub;
-  create: sinon.SinonStub;
-  duplicate: sinon.SinonStub;
-  query: sinon.SinonStub;
-  highlight: sinon.SinonStub;
-  update: sinon.SinonStub;
-  move: sinon.SinonStub;
-  reload: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  discard: sinon.SinonStub;
-  detectLanguage: sinon.SinonStub;
-  toggleReaderMode: sinon.SinonStub;
-  captureTab: sinon.SinonStub;
-  captureVisibleTab: sinon.SinonStub;
-  executeScript: sinon.SinonStub;
-  insertCSS: sinon.SinonStub;
-  removeCSS: sinon.SinonStub;
-  setZoom: sinon.SinonStub;
-  getZoom: sinon.SinonStub;
-  setZoomSettings: sinon.SinonStub;
-  getZoomSettings: sinon.SinonStub;
-  print: sinon.SinonStub;
-  printPreview: sinon.SinonStub;
-  saveAsPDF: sinon.SinonStub;
-  show: sinon.SinonStub;
-  hide: sinon.SinonStub;
-  moveInSuccession: sinon.SinonStub;
-  onCreated: SinonEventStub;
-  onUpdated: SinonEventStub;
-  onMoved: SinonEventStub;
-  onSelectionChanged?: SinonEventStub;
-  onActiveChanged?: SinonEventStub;
-  onActivated: SinonEventStub;
-  onHighlightChanged?: SinonEventStub;
-  onHighlighted: SinonEventStub;
-  onDetached: SinonEventStub;
-  onAttached: SinonEventStub;
-  onRemoved: SinonEventStub;
-  onReplaced: SinonEventStub;
-  onZoomChange: SinonEventStub;
-  MutedInfoReason: TabsMutedInfoReason[];
   MutedInfo: {
-    muted: boolean;
     extensionId?: string;
+    muted: boolean;
+    reason?: Tabs['MutedInfoReason'];
   };
-  SharingState: {
-    screen?: string;
-    camera: boolean;
-    microphone: boolean;
-  };
-  Tab: {
-    id?: number;
-    index: number;
-    windowId?: number;
-    openerTabId?: number;
-    selected: boolean;
-    highlighted: boolean;
-    active: boolean;
-    pinned: boolean;
-    lastAccessed?: number;
-    audible?: boolean;
-    url?: string;
-    title?: string;
-    favIconUrl?: string;
-    status?: string;
-    discarded?: boolean;
-    incognito: boolean;
-    width?: number;
-    height?: number;
-    hidden?: boolean;
-    sessionId?: string;
-    cookieStoreId?: string;
-    isArticle?: boolean;
-    isInReaderMode?: boolean;
-    attention?: boolean;
-    successorTabId?: number;
-  };
-  ZoomSettingsMode: TabsZoomSettingsMode[];
-  ZoomSettingsScope: TabsZoomSettingsScope[];
-  ZoomSettings: {};
+  MutedInfoReason: TabsMutedInfoReason;
   PageSettings: {
-    paperSizeUnit?: number;
+    edgeBottom?: number;
+    edgeLeft?: number;
+    edgeRight?: number;
+    edgeTop?: number;
+    footerCenter?: string;
+    footerLeft?: string;
+    footerRight?: string;
+    headerCenter?: string;
+    headerLeft?: string;
+    headerRight?: string;
+    marginBottom?: number;
+    marginLeft?: number;
+    marginRight?: number;
+    marginTop?: number;
     orientation?: number;
-    shrinkToFit?: boolean;
+    paperHeight?: number;
+    paperSizeUnit?: number;
+    paperWidth?: number;
+    scaling?: number;
     showBackgroundColors?: boolean;
     showBackgroundImages?: boolean;
-    headerLeft?: string;
-    headerCenter?: string;
-    headerRight?: string;
-    footerLeft?: string;
-    footerCenter?: string;
-    footerRight?: string;
+    shrinkToFit?: boolean;
   };
-  TabStatus: TabsTabStatus[];
-  WindowType: TabsWindowType[];
-  UpdatePropertyName: TabsUpdatePropertyName[];
-  UpdateFilter: {
-    urls?: string[];
-    tabId?: number;
-    windowId?: number;
+  SharingState: {
+    camera: boolean;
+    microphone: boolean;
+    screen?: string;
   };
   TAB_ID_NONE: -1;
+  Tab: {
+    active: boolean;
+    attention?: boolean;
+    audible?: boolean;
+    cookieStoreId?: string;
+    discarded?: boolean;
+    favIconUrl?: string;
+    height?: number;
+    hidden?: boolean;
+    highlighted: boolean;
+    id?: number;
+    incognito: boolean;
+    index: number;
+    isArticle?: boolean;
+    isInReaderMode?: boolean;
+    lastAccessed?: number;
+    mutedInfo?: Tabs['MutedInfo'];
+    openerTabId?: number;
+    pinned: boolean;
+    selected?: boolean;
+    sessionId?: string;
+    sharingState?: Tabs['SharingState'];
+    status?: string;
+    successorTabId?: number;
+    title?: string;
+    url?: string;
+    width?: number;
+    windowId?: number;
+  };
+  TabStatus: TabsTabStatus;
+  UpdateFilter: {
+    properties?: Tabs['UpdatePropertyName'][];
+    tabId?: number;
+    urls?: string[];
+    windowId?: number;
+  };
+  UpdatePropertyName: TabsUpdatePropertyName;
+  WindowType: TabsWindowType;
+  ZoomSettings: {
+    defaultZoomFactor?: number;
+    mode?: Tabs['ZoomSettingsMode'];
+    scope?: Tabs['ZoomSettingsScope'];
+  };
+  ZoomSettingsMode: TabsZoomSettingsMode;
+  ZoomSettingsScope: TabsZoomSettingsScope;
+  captureTab: sinon.SinonStub;
+  captureVisibleTab: sinon.SinonStub;
+  connect: sinon.SinonStub<any[], Runtime['Port']>;
+  create: sinon.SinonStub;
+  detectLanguage: sinon.SinonStub;
+  discard: sinon.SinonStub;
+  duplicate: sinon.SinonStub;
+  executeScript: sinon.SinonStub;
+  get: sinon.SinonStub;
+  getAllInWindow?: sinon.SinonStub;
+  getCurrent: sinon.SinonStub;
+  getSelected?: sinon.SinonStub;
+  getZoom: sinon.SinonStub;
+  getZoomSettings: sinon.SinonStub;
+  hide: sinon.SinonStub;
+  highlight: sinon.SinonStub;
+  insertCSS: sinon.SinonStub;
+  move: sinon.SinonStub;
+  moveInSuccession: sinon.SinonStub;
+  onActivated: Events['Event'];
+  onActiveChanged: Events['Event'];
+  onAttached: Events['Event'];
+  onCreated: Events['Event'];
+  onDetached: Events['Event'];
+  onHighlightChanged: Events['Event'];
+  onHighlighted: Events['Event'];
+  onMoved: Events['Event'];
+  onRemoved: Events['Event'];
+  onReplaced: Events['Event'];
+  onSelectionChanged: Events['Event'];
+  onUpdated: Events['Event'];
+  onZoomChange: Events['Event'];
+  print: sinon.SinonStub;
+  printPreview: sinon.SinonStub;
+  query: sinon.SinonStub;
+  reload: sinon.SinonStub;
+  remove: sinon.SinonStub;
+  removeCSS: sinon.SinonStub;
+  saveAsPDF: sinon.SinonStub;
+  sendMessage: sinon.SinonStub;
+  sendRequest?: sinon.SinonStub;
+  setZoom: sinon.SinonStub;
+  setZoomSettings: sinon.SinonStub;
+  show: sinon.SinonStub;
+  toggleReaderMode: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
 export type TabsMutedInfoReason = 'user' | 'capture' | 'extension';
 
-export type TabsZoomSettingsMode = 'automatic' | 'manual' | 'disabled';
-
-export type TabsZoomSettingsScope = 'per-origin' | 'per-tab';
-
 export type TabsTabStatus = 'loading' | 'complete';
-
-export type TabsWindowType = 'normal' | 'popup' | 'panel' | 'app' | 'devtools';
 
 export type TabsUpdatePropertyName =
   | 'attention'
@@ -1320,88 +1593,92 @@ export type TabsUpdatePropertyName =
   | 'status'
   | 'title';
 
+export type TabsWindowType = 'normal' | 'popup' | 'panel' | 'app' | 'devtools';
+
+export type TabsZoomSettingsMode = 'automatic' | 'manual' | 'disabled';
+
+export type TabsZoomSettingsScope = 'per-origin' | 'per-tab';
+
 export interface Telemetry {
-  submitPing: sinon.SinonStub;
+  EventData: {
+    expired?: boolean;
+    extra_keys: string[];
+    methods: string[];
+    objects: string[];
+    record_on_release?: boolean;
+  };
+  ScalarData: {
+    expired?: boolean;
+    keyed?: boolean;
+    kind: Telemetry['ScalarType'];
+    record_on_release?: boolean;
+  };
+  ScalarType: TelemetryScalarType;
   canUpload: sinon.SinonStub;
+  recordEvent: sinon.SinonStub;
+  registerEvents: sinon.SinonStub;
+  registerScalars: sinon.SinonStub;
   scalarAdd: sinon.SinonStub;
   scalarSet: sinon.SinonStub;
   scalarSetMaximum: sinon.SinonStub;
-  recordEvent: sinon.SinonStub;
-  registerScalars: sinon.SinonStub;
-  registerEvents: sinon.SinonStub;
   setEventRecordingEnabled: sinon.SinonStub;
-  ScalarType: TelemetryScalarType[];
-  ScalarData: {
-    keyed?: boolean;
-    record_on_release?: boolean;
-    expired?: boolean;
-  };
-  EventData: {
-    methods: string[];
-    objects: string[];
-    extra_keys: string[];
-    record_on_release?: boolean;
-    expired?: boolean;
-  };
+  submitPing: sinon.SinonStub;
 }
 
 export type TelemetryScalarType = 'count' | 'string' | 'boolean';
 
 export interface Test {
-  notifyFail: sinon.SinonStub;
-  notifyPass: sinon.SinonStub;
-  log: sinon.SinonStub;
-  sendMessage: sinon.SinonStub;
-  fail: sinon.SinonStub;
-  succeed: sinon.SinonStub;
-  assertTrue: sinon.SinonStub;
-  assertFalse: sinon.SinonStub;
+  ExpectedError: any;
+  Promise: any;
   assertBool?: sinon.SinonStub;
-  checkDeepEq?: sinon.SinonStub;
   assertEq: sinon.SinonStub;
-  assertNoLastError?: sinon.SinonStub;
+  assertFalse: sinon.SinonStub;
   assertLastError?: sinon.SinonStub;
+  assertNoLastError?: sinon.SinonStub;
   assertRejects: sinon.SinonStub;
   assertThrows: sinon.SinonStub;
-  onMessage: SinonEventStub;
+  assertTrue: sinon.SinonStub;
+  checkDeepEq?: sinon.SinonStub;
+  fail: sinon.SinonStub;
+  log: sinon.SinonStub;
+  notifyFail: sinon.SinonStub;
+  notifyPass: sinon.SinonStub;
+  onMessage: Events['Event'];
+  sendMessage: sinon.SinonStub;
+  succeed: sinon.SinonStub;
 }
 
 export interface Theme {
-  getCurrent: sinon.SinonStub;
-  update: sinon.SinonStub;
-  reset: sinon.SinonStub;
-  onUpdated: SinonEventStub;
   ThemeUpdateInfo: {
+    theme: {};
     windowId?: number;
   };
+  getCurrent: sinon.SinonStub;
+  onUpdated: Events['Event'];
+  reset: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
 export interface TopSites {
-  get: sinon.SinonStub;
   MostVisitedURL: {
-    url: string;
-    title?: string;
     favicon?: string;
-    type?: string;
+    title?: string;
+    type?: 'url' | 'search';
+    url: string;
   };
+  get: sinon.SinonStub;
 }
 
 export interface Types {
-  SettingScope: TypesSettingScope[];
-  LevelOfControl: TypesLevelOfControl[];
+  LevelOfControl: TypesLevelOfControl;
   Setting: {
-    get: sinon.SinonStub;
-    set: sinon.SinonStub;
     clear: sinon.SinonStub;
-    onChange?: SinonEventStub;
+    get: sinon.SinonStub;
+    onChange: Events['Event'];
+    set: sinon.SinonStub;
   };
+  SettingScope: TypesSettingScope;
 }
-
-export type TypesSettingScope =
-  | 'regular'
-  | 'regular_only'
-  | 'incognito_persistent'
-  | 'incognito_session_only';
 
 export type TypesLevelOfControl =
   | 'not_controllable'
@@ -1409,21 +1686,48 @@ export type TypesLevelOfControl =
   | 'controllable_by_this_extension'
   | 'controlled_by_this_extension';
 
+export type TypesSettingScope =
+  | 'regular'
+  | 'regular_only'
+  | 'incognito_persistent'
+  | 'incognito_session_only';
+
 export interface Urlbar {
-  onBehaviorRequested: SinonEventStub;
-  onQueryCanceled: SinonEventStub;
-  onResultsRequested: SinonEventStub;
   Query: {
+    acceptableSources: Urlbar['SourceType'][];
     isPrivate: boolean;
     maxResults: number;
     searchString: string;
   };
-  Result: {};
-  ResultType: UrlbarResultType[];
-  SourceType: UrlbarSourceType[];
-  openViewOnFocus: Types['Setting'];
-  engagementTelemetry: Types['Setting'];
+  Result: {
+    payload: {};
+    source: Urlbar['SourceType'];
+    type: Urlbar['ResultType'];
+  };
+  ResultType: UrlbarResultType;
+  SourceType: UrlbarSourceType;
   contextualTip: UrlbarContextualTip;
+  engagementTelemetry: Types['Setting'];
+  onBehaviorRequested: Events['Event'];
+  onQueryCanceled: Events['Event'];
+  onResultsRequested: Events['Event'];
+  openViewOnFocus: Types['Setting'];
+}
+
+export interface UrlbarContextualTip {
+  ContextualTip: {
+    buttonTitle?: string;
+    icon?: {
+      defaultIcon: any;
+      themeIcons?: Manifest['ThemeIcons'][];
+    };
+    linkTitle?: string;
+    title: string;
+  };
+  onButtonClicked: Events['Event'];
+  onLinkClicked: Events['Event'];
+  remove: sinon.SinonStub;
+  set: sinon.SinonStub;
 }
 
 export type UrlbarResultType = 'remote_tab' | 'search' | 'tab' | 'url';
@@ -1436,48 +1740,49 @@ export type UrlbarSourceType =
   | 'local'
   | 'network';
 
-export interface UrlbarContextualTip {
-  set: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  onButtonClicked: SinonEventStub;
-  onLinkClicked: SinonEventStub;
-  ContextualTip: {
-    title: string;
-    buttonTitle?: string;
-    linkTitle?: string;
-  };
-}
-
 export interface UserScripts {
-  register: sinon.SinonStub;
-  UserScriptOptions: {
-    includeGlobs?: string[];
-    excludeGlobs?: string[];
-    allFrames?: boolean;
-    matchAboutBlank?: boolean;
-  };
   RegisteredUserScript: {
     unregister: sinon.SinonStub;
   };
-  onBeforeScript: SinonEventStub;
+  UserScriptOptions: {
+    allFrames?: boolean;
+    excludeGlobs?: string[];
+    excludeMatches?: Manifest['MatchPattern'][];
+    includeGlobs?: string[];
+    js?: ExtensionTypes['ExtensionFileOrCode'][];
+    matchAboutBlank?: boolean;
+    matches: Manifest['MatchPattern'][];
+    runAt?: ExtensionTypes['RunAt'];
+    scriptMetadata?: ExtensionTypes['PlainJSONValue'];
+  };
+  onBeforeScript: Events['Event'];
+  register: sinon.SinonStub;
 }
 
 export interface WebNavigation {
-  getFrame: sinon.SinonStub;
+  EventUrlFilters: {
+    url: Events['UrlFilter'][];
+  };
+  TransitionQualifier: WebNavigationTransitionQualifier;
+  TransitionType: WebNavigationTransitionType;
   getAllFrames: sinon.SinonStub;
-  onBeforeNavigate: SinonEventStub;
-  onCommitted: SinonEventStub;
-  onDOMContentLoaded: SinonEventStub;
-  onCompleted: SinonEventStub;
-  onErrorOccurred: SinonEventStub;
-  onCreatedNavigationTarget: SinonEventStub;
-  onReferenceFragmentUpdated: SinonEventStub;
-  onTabReplaced: SinonEventStub;
-  onHistoryStateUpdated: SinonEventStub;
-  TransitionType: WebNavigationTransitionType[];
-  TransitionQualifier: WebNavigationTransitionQualifier[];
-  EventUrlFilters: {};
+  getFrame: sinon.SinonStub;
+  onBeforeNavigate: Events['Event'];
+  onCommitted: Events['Event'];
+  onCompleted: Events['Event'];
+  onCreatedNavigationTarget: Events['Event'];
+  onDOMContentLoaded: Events['Event'];
+  onErrorOccurred: Events['Event'];
+  onHistoryStateUpdated: Events['Event'];
+  onReferenceFragmentUpdated: Events['Event'];
+  onTabReplaced: Events['Event'];
 }
+
+export type WebNavigationTransitionQualifier =
+  | 'client_redirect'
+  | 'server_redirect'
+  | 'forward_back'
+  | 'from_address_bar';
 
 export type WebNavigationTransitionType =
   | 'link'
@@ -1492,75 +1797,127 @@ export type WebNavigationTransitionType =
   | 'keyword'
   | 'keyword_generated';
 
-export type WebNavigationTransitionQualifier =
-  | 'client_redirect'
-  | 'server_redirect'
-  | 'forward_back'
-  | 'from_address_bar';
-
 export interface WebRequest {
-  handlerBehaviorChanged: sinon.SinonStub;
-  filterResponseData: sinon.SinonStub;
-  getSecurityInfo: sinon.SinonStub;
-  onBeforeRequest: SinonEventStub;
-  onBeforeSendHeaders: SinonEventStub;
-  onSendHeaders: SinonEventStub;
-  onHeadersReceived: SinonEventStub;
-  onAuthRequired: SinonEventStub;
-  onResponseStarted: SinonEventStub;
-  onBeforeRedirect: SinonEventStub;
-  onCompleted: SinonEventStub;
-  onErrorOccurred: SinonEventStub;
-  ResourceType: WebRequestResourceType[];
-  OnBeforeRequestOptions: WebRequestOnBeforeRequestOptions[];
-  OnBeforeSendHeadersOptions: WebRequestOnBeforeSendHeadersOptions[];
-  OnSendHeadersOptions: WebRequestOnSendHeadersOptions[];
-  OnHeadersReceivedOptions: WebRequestOnHeadersReceivedOptions[];
-  OnAuthRequiredOptions: WebRequestOnAuthRequiredOptions[];
-  OnResponseStartedOptions: WebRequestOnResponseStartedOptions[];
-  OnBeforeRedirectOptions: WebRequestOnBeforeRedirectOptions[];
-  OnCompletedOptions: WebRequestOnCompletedOptions[];
-  RequestFilter: {
-    urls: string[];
-    tabId?: number;
-    windowId?: number;
-    incognito?: boolean;
-  };
   BlockingResponse: {
+    authCredentials?: {
+      password: string;
+      username: string;
+    };
     cancel?: boolean;
     redirectUrl?: string;
+    requestHeaders?: WebRequest['HttpHeaders'];
+    responseHeaders?: WebRequest['HttpHeaders'];
     upgradeToSecure?: boolean;
   };
   CertificateInfo: {
-    subject: string;
-    issuer: string;
-    serialNumber: string;
+    fingerprint: {
+      sha1: string;
+      sha256: string;
+    };
     isBuiltInRoot: boolean;
+    issuer: string;
+    rawDER?: number[];
+    serialNumber: string;
+    subject: string;
+    subjectPublicKeyInfoDigest: {
+      sha256: string;
+    };
+    validity: {
+      end: number;
+      start: number;
+    };
   };
-  CertificateTransparencyStatus: WebRequestCertificateTransparencyStatus[];
-  TransportWeaknessReasons: WebRequestTransportWeaknessReasons[];
+  CertificateTransparencyStatus: WebRequestCertificateTransparencyStatus;
+  HttpHeaders: {
+    binaryValue?: number[];
+    name: string;
+    value?: string;
+  }[];
+  MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: 20;
+  OnAuthRequiredOptions: WebRequestOnAuthRequiredOptions;
+  OnBeforeRedirectOptions: WebRequestOnBeforeRedirectOptions;
+  OnBeforeRequestOptions: WebRequestOnBeforeRequestOptions;
+  OnBeforeSendHeadersOptions: WebRequestOnBeforeSendHeadersOptions;
+  OnCompletedOptions: WebRequestOnCompletedOptions;
+  OnHeadersReceivedOptions: WebRequestOnHeadersReceivedOptions;
+  OnResponseStartedOptions: WebRequestOnResponseStartedOptions;
+  OnSendHeadersOptions: WebRequestOnSendHeadersOptions;
+  RequestFilter: {
+    incognito?: boolean;
+    tabId?: number;
+    types?: WebRequest['ResourceType'][];
+    urls: string[];
+    windowId?: number;
+  };
+  ResourceType: WebRequestResourceType;
   SecurityInfo: {
-    state: string;
-    errorMessage?: string;
-    protocolVersion?: string;
+    certificateTransparencyStatus?: WebRequest['CertificateTransparencyStatus'];
+    certificates: WebRequest['CertificateInfo'][];
     cipherSuite?: string;
-    keaGroupName?: string;
-    signatureSchemeName?: string;
+    errorMessage?: string;
+    hpkp?: string;
+    hsts?: boolean;
     isDomainMismatch?: boolean;
     isExtendedValidation?: boolean;
     isNotValidAtThisTime?: boolean;
     isUntrusted?: boolean;
-    hsts?: boolean;
-    hpkp?: string;
+    keaGroupName?: string;
+    protocolVersion?: 'TLSv1' | 'TLSv1.1' | 'TLSv1.2' | 'TLSv1.3' | 'unknown';
+    signatureSchemeName?: string;
+    state: 'insecure' | 'weak' | 'broken' | 'secure';
+    weaknessReasons?: WebRequest['TransportWeaknessReasons'][];
   };
+  TransportWeaknessReasons: WebRequestTransportWeaknessReasons;
   UploadData: {
     bytes?: any;
     file?: string;
   };
-  UrlClassificationFlags: WebRequestUrlClassificationFlags[];
-  UrlClassification: {};
-  MAX_HANDLER_BEHAVIOR_CHANGED_CALLS_PER_10_MINUTES: 20;
+  UrlClassification: {
+    firstParty: WebRequest['UrlClassificationParty'];
+    thirdParty: WebRequest['UrlClassificationParty'];
+  };
+  UrlClassificationFlags: WebRequestUrlClassificationFlags;
+  UrlClassificationParty: WebRequest['UrlClassificationFlags'][];
+  filterResponseData: sinon.SinonStub;
+  getSecurityInfo: sinon.SinonStub;
+  handlerBehaviorChanged: sinon.SinonStub;
+  onAuthRequired: Events['Event'];
+  onBeforeRedirect: Events['Event'];
+  onBeforeRequest: Events['Event'];
+  onBeforeSendHeaders: Events['Event'];
+  onCompleted: Events['Event'];
+  onErrorOccurred: Events['Event'];
+  onHeadersReceived: Events['Event'];
+  onResponseStarted: Events['Event'];
+  onSendHeaders: Events['Event'];
 }
+
+export type WebRequestCertificateTransparencyStatus =
+  | 'not_applicable'
+  | 'policy_compliant'
+  | 'policy_not_enough_scts'
+  | 'policy_not_diverse_scts';
+
+export type WebRequestOnAuthRequiredOptions =
+  | 'responseHeaders'
+  | 'blocking'
+  | 'asyncBlocking';
+
+export type WebRequestOnBeforeRedirectOptions = 'responseHeaders';
+
+export type WebRequestOnBeforeRequestOptions = 'blocking' | 'requestBody';
+
+export type WebRequestOnBeforeSendHeadersOptions =
+  | 'requestHeaders'
+  | 'blocking';
+
+export type WebRequestOnCompletedOptions = 'responseHeaders';
+
+export type WebRequestOnHeadersReceivedOptions = 'blocking' | 'responseHeaders';
+
+export type WebRequestOnResponseStartedOptions = 'responseHeaders';
+
+export type WebRequestOnSendHeadersOptions = 'requestHeaders';
 
 export type WebRequestResourceType =
   | 'main_frame'
@@ -1585,33 +1942,6 @@ export type WebRequestResourceType =
   | 'speculative'
   | 'other';
 
-export type WebRequestOnBeforeRequestOptions = 'blocking' | 'requestBody';
-
-export type WebRequestOnBeforeSendHeadersOptions =
-  | 'requestHeaders'
-  | 'blocking';
-
-export type WebRequestOnSendHeadersOptions = 'requestHeaders';
-
-export type WebRequestOnHeadersReceivedOptions = 'blocking' | 'responseHeaders';
-
-export type WebRequestOnAuthRequiredOptions =
-  | 'responseHeaders'
-  | 'blocking'
-  | 'asyncBlocking';
-
-export type WebRequestOnResponseStartedOptions = 'responseHeaders';
-
-export type WebRequestOnBeforeRedirectOptions = 'responseHeaders';
-
-export type WebRequestOnCompletedOptions = 'responseHeaders';
-
-export type WebRequestCertificateTransparencyStatus =
-  | 'not_applicable'
-  | 'policy_compliant'
-  | 'policy_not_enough_scts'
-  | 'policy_not_diverse_scts';
-
 export type WebRequestTransportWeaknessReasons = 'cipher';
 
 export type WebRequestUrlClassificationFlags =
@@ -1629,44 +1959,43 @@ export type WebRequestUrlClassificationFlags =
   | 'any_social_tracking';
 
 export interface Windows {
-  get: sinon.SinonStub;
-  getCurrent: sinon.SinonStub;
-  getLastFocused: sinon.SinonStub;
-  getAll: sinon.SinonStub;
-  create: sinon.SinonStub;
-  update: sinon.SinonStub;
-  remove: sinon.SinonStub;
-  onCreated: SinonEventStub;
-  onRemoved: SinonEventStub;
-  onFocusChanged: SinonEventStub;
-  WindowType: WindowsWindowType[];
-  WindowState: WindowsWindowState[];
-  Window: {
-    id?: number;
-    focused: boolean;
-    top?: number;
-    left?: number;
-    width?: number;
-    height?: number;
-    incognito: boolean;
-    alwaysOnTop: boolean;
-    sessionId?: string;
-    title?: string;
-  };
-  CreateType: WindowsCreateType[];
+  CreateType: WindowsCreateType;
   GetInfo: {
     populate?: boolean;
+    windowTypes?: Windows['WindowType'][];
   };
-  WINDOW_ID_NONE: -1;
   WINDOW_ID_CURRENT: -2;
+  WINDOW_ID_NONE: -1;
+  Window: {
+    alwaysOnTop: boolean;
+    focused: boolean;
+    height?: number;
+    id?: number;
+    incognito: boolean;
+    left?: number;
+    sessionId?: string;
+    state?: Windows['WindowState'];
+    tabs?: Tabs['Tab'][];
+    title?: string;
+    top?: number;
+    type?: Windows['WindowType'];
+    width?: number;
+  };
+  WindowState: WindowsWindowState;
+  WindowType: WindowsWindowType;
+  create: sinon.SinonStub;
+  get: sinon.SinonStub;
+  getAll: sinon.SinonStub;
+  getCurrent: sinon.SinonStub;
+  getLastFocused: sinon.SinonStub;
+  onCreated: Events['Event'];
+  onFocusChanged: Events['Event'];
+  onRemoved: Events['Event'];
+  remove: sinon.SinonStub;
+  update: sinon.SinonStub;
 }
 
-export type WindowsWindowType =
-  | 'normal'
-  | 'popup'
-  | 'panel'
-  | 'app'
-  | 'devtools';
+export type WindowsCreateType = 'normal' | 'popup' | 'panel' | 'detached_panel';
 
 export type WindowsWindowState =
   | 'normal'
@@ -1675,6 +2004,9 @@ export type WindowsWindowState =
   | 'fullscreen'
   | 'docked';
 
-export type WindowsCreateType = 'normal' | 'popup' | 'panel' | 'detached_panel';
-
-export type ContextMenus = Menus;
+export type WindowsWindowType =
+  | 'normal'
+  | 'popup'
+  | 'panel'
+  | 'app'
+  | 'devtools';
