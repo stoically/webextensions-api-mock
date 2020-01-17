@@ -1,19 +1,15 @@
-import { TypeSchemaGenerator, OutTypeSchema } from './typeschema';
+import { TypeSchemaGenerator, OutTypeSchema, OutWorking } from './typeschema';
 import { SchemaNamespaces, NamespaceSchema } from 'webextensions-schema';
-import { capitalize } from './helper';
+import { capitalize, capitalizeArray, isCapitalized } from './helper';
 
 const OUT_PREFIX = `
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import sinon from 'sinon';
 
-export interface SinonEventStub {
-  addListener: sinon.SinonStub;
-  removeListener: sinon.SinonStub;
-  hasListener: sinon.SinonStub;
-}
-
 `;
+
+const SUBSTITUTE_REGEX = /\%\%([^\%]+)\%\%/g;
 
 export type OutNamespaces = Map<string, OutTypeSchema>;
 
@@ -26,33 +22,39 @@ export class NamespacesGenerator {
     [key: string]: string;
   }[] = [];
 
+  private working: OutWorking = {
+    // Contains names of all valid interfaces and types.
+    // Used to substitute references after generation.
+    // Initialise with any built-in javascript classes that are referenced
+    // in the schema data.
+    interfaceOrTypeNames: new Set(['ImageData']),
+    childObjectTypeSchemas: [],
+  };
+
   constructor(namespaces: SchemaNamespaces) {
     Object.keys(namespaces).forEach(namespaceName => {
       namespaces[namespaceName].forEach(namespace => this.namespace(namespace));
     });
+
+    this.substituteReferences();
   }
 
   private namespace(namespace: NamespaceSchema): void {
     const nameParts = namespace.namespace.split('.');
     const [topLevelName] = nameParts;
+    const interfaceName = nameParts.map(name => capitalize(name)).join('');
+    this.working.interfaceOrTypeNames.add(interfaceName);
+
     if (!this.outBrowser.has(topLevelName)) {
       this.outBrowser.set(topLevelName, capitalize(topLevelName));
     }
 
-    if (namespace.$import) {
-      this.imports.push({
-        name: capitalize(namespace.namespace),
-        import: capitalize(namespace.$import),
-      });
-      return;
-    }
-
-    const interfaceName = nameParts.map(name => capitalize(name)).join('');
     let out = this.outNamespaces.get(interfaceName);
     if (!out) {
       out = {
         parent: [],
         childTypes: [],
+        extendsInterfaceName: undefined,
       };
       this.outNamespaces.set(interfaceName, out);
     }
@@ -60,7 +62,7 @@ export class NamespacesGenerator {
     if (nameParts.length > 1) {
       let lastName = '';
       nameParts.forEach((namePart, index) => {
-        if (index > 0) {
+        if (index > 0 && !isCapitalized(namePart)) {
           this.outNamespaces
             .get(lastName)
             ?.parent.push(`${namePart}: ${lastName + capitalize(namePart)};`);
@@ -69,7 +71,55 @@ export class NamespacesGenerator {
       });
     }
 
-    new TypeSchemaGenerator(interfaceName, namespace, out);
+    new TypeSchemaGenerator(
+      topLevelName,
+      interfaceName,
+      namespace,
+      out,
+      this.working
+    );
+
+    const childObjectTypeSchemas = this.working.childObjectTypeSchemas;
+    this.working.childObjectTypeSchemas = [];
+    childObjectTypeSchemas.forEach(typeSchema => {
+      const typeSchemaName = typeSchema.id || typeSchema.name;
+      if (typeSchemaName) {
+        const namespace = typeSchema as NamespaceSchema;
+        namespace.namespace = `${topLevelName}.${typeSchemaName}`;
+        this.namespace(namespace);
+      }
+    });
+  }
+
+  private substituteReferences(): void {
+    this.outNamespaces.forEach((outInterface, interfaceName) => {
+      outInterface.parent.forEach((line, index, array) => {
+        array[index] = this.substituteReference(line);
+      });
+      if (outInterface.extendsInterfaceName) {
+        outInterface.extendsInterfaceName = this.substituteReference(
+          outInterface.extendsInterfaceName
+        );
+      }
+      outInterface.childTypes.forEach((line, index, array) => {
+        array[index] = this.substituteReference(line);
+      });
+    });
+  }
+
+  private substituteReference(line: string): string {
+    return line.replace(SUBSTITUTE_REGEX, (a, ref) => {
+      const refParts = capitalizeArray(ref.split('.'));
+      let newRef = refParts.slice(1).join('');
+      if (!this.working.interfaceOrTypeNames.has(newRef)) {
+        newRef = refParts.join('');
+        if (!this.working.interfaceOrTypeNames.has(newRef)) {
+          console.warn(`Ref not found: '${ref}'`);
+          return 'any';
+        }
+      }
+      return newRef;
+    });
   }
 
   public out(): string {
@@ -82,7 +132,10 @@ export class NamespacesGenerator {
     out.push(`}\n`);
 
     this.outNamespaces.forEach((outInterface, interfaceName) => {
-      out.push(`export interface ${interfaceName} {`);
+      const extendsInterface = outInterface.extendsInterfaceName
+        ? ` extends ${outInterface.extendsInterfaceName}`
+        : '';
+      out.push(`export interface ${interfaceName}${extendsInterface} {`);
       outInterface.parent.forEach(value => {
         if (value.startsWith('eval:')) {
           out.push('// @ts-ignore');
@@ -90,16 +143,16 @@ export class NamespacesGenerator {
 
         out.push(value);
       });
-      out.push(`}\n`);
+      const ignoreEmpty =
+        outInterface.parent.length > 0
+          ? ''
+          : ' // eslint-disable-line @typescript-eslint/no-empty-interface';
+      out.push(`}${ignoreEmpty}\n`);
 
       outInterface.childTypes.forEach(value => {
         out.push(`export ${value}\n`);
       });
     });
-
-    this.imports.forEach(nsImport =>
-      out.push(`export type ${nsImport.name} = ${nsImport.import};`)
-    );
 
     return out.join('\n');
   }
