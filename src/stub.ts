@@ -73,7 +73,7 @@ export class BrowserBuilder {
         if (!event.name || event.type !== 'function') {
           return;
         }
-        stub[event.name] = this.event(event);
+        stub[event.name] = this.event();
       });
     }
 
@@ -113,9 +113,11 @@ export class BrowserBuilder {
     if (ref) {
       return this.schema(ref);
     } else {
-      console.warn(
-        `Ref not found '${refName}' in namespace '${this.namespaceName}'`
-      );
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          `Ref not found '${refName}' in namespace '${this.namespaceName}'`
+        );
+      }
     }
   }
 
@@ -128,8 +130,7 @@ export class BrowserBuilder {
     return stub;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private event(schema: TypeSchema): StubOut {
+  private event(): StubOut {
     return {
       addListener: this.sandbox.stub(),
       removeListener: this.sandbox.stub(),
