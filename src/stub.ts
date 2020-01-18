@@ -13,13 +13,44 @@ type AnySchema = {
   events?: TypeSchema[];
 };
 
+/**
+  Identifies either a NamespaceSchema or TypeSchema, and helps
+  create schemaIds for references to other TypeSchemas.
+ */
+class SchemaId {
+  name: string;
+  isTypeSchema: boolean;
+
+  constructor(name: string, isTypeSchema: boolean) {
+    this.name = name;
+    this.isTypeSchema = isTypeSchema;
+  }
+
+  get namespace(): string {
+    if (this.isTypeSchema) {
+      return this.name.substring(0, this.name.lastIndexOf('.'));
+    } else {
+      return this.name;
+    }
+  }
+
+  withRef(refName: string): SchemaId {
+    const name = refName.includes('.')
+      ? refName
+      : `${this.namespace}.${refName}`;
+    return new SchemaId(name, true);
+  }
+
+  static withNamespace(namespace: NamespaceSchema): SchemaId {
+    return new SchemaId(namespace.namespace, false);
+  }
+}
+
 export class BrowserBuilder {
   public sandbox: sinon.SinonSandbox;
   public browser: BrowserOut;
   public aliases: Map<string, string>;
   public types: Map<string, TypeSchema>;
-
-  private namespaceName = '';
 
   constructor(types: Map<string, TypeSchema>) {
     this.sandbox = sinon.createSandbox();
@@ -28,43 +59,29 @@ export class BrowserBuilder {
       sinonSandbox: this.sandbox,
     };
     this.types = new Map(types);
-
-    // Populate typenames without namespace prefix, in cases where no match is
-    // found for lookups using fully-qualified names
-    this.types.forEach((v, k, map) => {
-      const indexOfDot = k.lastIndexOf('.');
-      if (indexOfDot !== -1) {
-        const shortKey = k.substring(indexOfDot + 1);
-        if (shortKey.length > 0 && !map.has(shortKey)) {
-          map.set(shortKey, v);
-        }
-      }
-    });
   }
 
   public namespace(namespace: NamespaceSchema): void {
-    this.namespaceName = namespace.namespace;
-    this.browser[this.namespaceName] = this.schema(
-      namespace,
-      this.browser[this.namespaceName]
-    );
-    this.namespaceName = '';
+    this.schema(SchemaId.withNamespace(namespace), namespace);
   }
 
-  private schema(schema: AnySchema, stubOut?: StubOut): StubOut | undefined {
+  private schema(schemaId: SchemaId, schema: AnySchema): StubOut | undefined {
     if (schema.$import) {
-      this.aliases.set(this.namespaceName, schema.$import);
-      return stubOut;
+      this.aliases.set(schemaId.name, schema.$import);
+      return undefined;
     }
 
-    const stub: StubOut = stubOut || {};
+    let stub = this.browser[schemaId.name];
+    if (!stub) {
+      stub = this.browser[schemaId.name] = {};
+    }
 
     if (schema.properties) {
       Object.keys(schema.properties).forEach(propertyName => {
         if (!schema.properties) return;
 
         const property = schema.properties[propertyName];
-        stub[propertyName] = this.property(property);
+        stub[propertyName] = this.property(schemaId, property);
       });
     }
 
@@ -82,49 +99,48 @@ export class BrowserBuilder {
         if (!fn.name || fn.type !== 'function') {
           return;
         }
-        stub[fn.name] = this.fn(fn);
+        stub[fn.name] = this.fn(schemaId, fn);
       });
     }
 
     return stub;
   }
 
-  private property(schema: TypeSchema): StubOut | undefined {
+  private property(
+    schemaId: SchemaId,
+    schema: TypeSchema
+  ): StubOut | undefined {
     if (schema.value) {
       return schema.value;
     } else if (schema.$ref) {
-      return this.ref(schema.$ref);
+      return this.ref(schemaId.withRef(schema.$ref));
     } else if (schema.type) {
       switch (schema.type) {
         case 'function':
-          return this.fn(schema);
+          return this.fn(schemaId, schema);
       }
     }
   }
 
-  private ref(refName: string): StubOut | undefined {
-    const fullRefName = refName.includes('.')
-      ? refName
-      : `${this.namespaceName}.${refName}`;
-    let ref = this.types.get(fullRefName);
-    if (!ref) {
-      ref = this.types.get(refName);
-    }
-    if (ref) {
-      return this.schema(ref);
+  private ref(schemaId: SchemaId): StubOut | undefined {
+    if (this.browser[schemaId.name]) {
+      return this.browser[schemaId.name];
     } else {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(
-          `Ref not found '${refName}' in namespace '${this.namespaceName}'`
-        );
+      const schema = this.types.get(schemaId.name);
+      if (schema) {
+        return this.schema(schemaId, schema);
+      } else {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`Ref not found '${schemaId.name}'`);
+        }
       }
     }
   }
 
-  private fn(schema: TypeSchema): StubOut | undefined {
+  private fn(schemaId: SchemaId, schema: TypeSchema): StubOut | undefined {
     let stub = this.sandbox.stub();
     if (schema.returns && schema.returns.$ref) {
-      const value = this.ref(schema.returns.$ref);
+      const value = this.ref(schemaId.withRef(schema.returns.$ref));
       if (value) stub = stub.returns(value);
     }
     return stub;
