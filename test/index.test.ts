@@ -15,6 +15,13 @@ describe('WebExtensionsApiMock', () => {
     );
   });
 
+  it('should return a runtime.Port from runtime.connect', () => {
+    const browser = webExtensionsApiMock();
+
+    assert(typeof browser.runtime.connect().postMessage === 'function');
+    assert(typeof browser.runtime.connect().disconnect === 'function');
+  });
+
   it('should expose the sinon sandbox', async () => {
     const browser = webExtensionsApiMock();
 
