@@ -130,7 +130,7 @@ export class BrowserBuilder {
       if (schema) {
         return this.schema(schemaId, schema);
       } else {
-        if (process.env.NODE_ENV !== 'production') {
+        if (process?.env?.NODE_ENV !== 'production') {
           console.warn(`Ref not found '${schemaId.name}'`);
         }
       }
