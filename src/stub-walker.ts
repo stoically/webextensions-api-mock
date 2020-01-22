@@ -78,6 +78,7 @@ export class BrowserSchemaWalker implements SchemaWalkerDelegate {
   /* eslint-disable @typescript-eslint/no-empty-function */
   finishObjectPropertyValue(): SchemaWalkerValue {}
   finishTypeValue(): SchemaWalkerValue {}
+  valueForInvalidRef(): SchemaWalkerValue {}
   valueForCircularType(): SchemaWalkerValue {}
   createEnumValue(): SchemaWalkerValue {}
   createPlainValue(): SchemaWalkerValue {}

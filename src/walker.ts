@@ -31,6 +31,8 @@ export interface SchemaWalkerDelegate {
     out: SchemaWalkerValue
   ): SchemaWalkerValue;
 
+  valueForInvalidRef(schemaId: SchemaId): SchemaWalkerValue;
+
   valueForCircularType(schemaId: SchemaId): SchemaWalkerValue;
 
   finishTypeValue(
@@ -402,7 +404,7 @@ export class SchemaWalker {
       ) {
         console.warn(`Ref not found '${schemaId.name}'`);
       }
-      return 'any';
+      return this.delegate.valueForInvalidRef(schemaId);
     }
   }
 }
