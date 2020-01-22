@@ -71,9 +71,18 @@ export class BrowserBuilder {
       return undefined;
     }
 
-    let stub = this.browser[schemaId.name];
-    if (!stub) {
-      stub = this.browser[schemaId.name] = {};
+    let stub: StubOut;
+    if (schemaId.isTypeSchema) {
+      // Types - do not reuse, because different methods with
+      // same return type must return separate copies of that type,
+      // otherwise you can get false-positives for sinon assertions.
+      stub = {};
+    } else {
+      // Namespace - reuse values
+      stub = this.browser[schemaId.name];
+      if (!stub) {
+        stub = this.browser[schemaId.name] = {};
+      }
     }
 
     if (schema.properties) {
@@ -123,16 +132,12 @@ export class BrowserBuilder {
   }
 
   private ref(schemaId: SchemaId): StubOut | undefined {
-    if (this.browser[schemaId.name]) {
-      return this.browser[schemaId.name];
+    const schema = this.types.get(schemaId.name);
+    if (schema) {
+      return this.schema(schemaId, schema);
     } else {
-      const schema = this.types.get(schemaId.name);
-      if (schema) {
-        return this.schema(schemaId, schema);
-      } else {
-        if (process?.env?.NODE_ENV !== 'production') {
-          console.warn(`Ref not found '${schemaId.name}'`);
-        }
+      if (process?.env?.NODE_ENV !== 'production') {
+        console.warn(`Ref not found '${schemaId.name}'`);
       }
     }
   }
