@@ -134,6 +134,10 @@ export interface BrowserAction {
     windowId?: number;
   };
   ImageDataType: {};
+  OnClickData: {
+    button?: number;
+    modifiers: 'Shift' | 'Alt' | 'Command' | 'Ctrl' | 'MacCtrl'[];
+  };
   disable: sinon.SinonStub;
   enable: sinon.SinonStub;
   getBadgeBackgroundColor: sinon.SinonStub;
@@ -159,6 +163,7 @@ export interface BrowserSettings {
   cacheEnabled: Types['Setting'];
   closeTabsByDoubleClick: Types['Setting'];
   contextMenuShowEvent: Types['Setting'];
+  ftpProtocolEnabled: Types['Setting'];
   homepageOverride: Types['Setting'];
   imageAnimationBehavior: Types['Setting'];
   newTabPageOverride: Types['Setting'];
@@ -215,6 +220,7 @@ export interface BrowsingData {
 }
 
 export interface CaptivePortal {
+  canonicalURL: Types['Setting'];
   getLastChecked: sinon.SinonStub;
   getState: sinon.SinonStub;
   onConnectivityAvailable: Events['Event'];
@@ -709,7 +715,10 @@ export type GeckoProfilerProfilerFeature =
   | 'trackopts'
   | 'jstracer'
   | 'jsallocations'
-  | 'preferencereads';
+  | 'nostacksampling'
+  | 'nativeallocations'
+  | 'preferencereads'
+  | 'ipcmessages';
 
 export type GeckoProfilerSupports = 'windowLength';
 
@@ -1180,6 +1189,10 @@ export type OmniboxOnInputEnteredDisposition =
 
 export interface PageAction {
   ImageDataType: {};
+  OnClickData: {
+    button?: number;
+    modifiers: 'Shift' | 'Alt' | 'Command' | 'Ctrl' | 'MacCtrl'[];
+  };
   getPopup: sinon.SinonStub;
   getTitle: sinon.SinonStub;
   hide: sinon.SinonStub;
@@ -1224,8 +1237,13 @@ export interface Privacy {
 
 export interface PrivacyNetwork {
   IPHandlingPolicy: PrivacyNetworkIPHandlingPolicy;
+  TlsVersionRestrictionConfig: {
+    maximum?: 'TLSv1' | 'TLSv1.1' | 'TLSv1.2' | 'TLSv1.3' | 'unknown';
+    minimum?: 'TLSv1' | 'TLSv1.1' | 'TLSv1.2' | 'TLSv1.3' | 'unknown';
+  };
   networkPredictionEnabled: Types['Setting'];
   peerConnectionEnabled: Types['Setting'];
+  tlsVersionRestriction: Types['Setting'];
   webRTCIPHandlingPolicy: Types['Setting'];
 }
 
@@ -1276,17 +1294,14 @@ export interface Proxy {
     passthrough?: string;
     proxyDNS?: boolean;
     proxyType?: 'none' | 'autoDetect' | 'system' | 'manual' | 'autoConfig';
+    respectBeConservative?: boolean;
     socks?: string;
     socksVersion?: number;
     ssl?: string;
   };
   onError: Events['Event'];
-  onProxyError: Events['Event'];
   onRequest: Events['Event'];
-  register: sinon.SinonStub;
-  registerProxyScript: sinon.SinonStub;
   settings: Types['Setting'];
-  unregister: sinon.SinonStub;
 }
 
 export interface Runtime {
@@ -1585,7 +1600,6 @@ export type TabsUpdatePropertyName =
   | 'discarded'
   | 'favIconUrl'
   | 'hidden'
-  | 'isarticle'
   | 'isArticle'
   | 'mutedInfo'
   | 'pinned'
@@ -1615,6 +1629,9 @@ export interface Telemetry {
   };
   ScalarType: TelemetryScalarType;
   canUpload: sinon.SinonStub;
+  keyedScalarAdd: sinon.SinonStub;
+  keyedScalarSet: sinon.SinonStub;
+  keyedScalarSetMaximum: sinon.SinonStub;
   recordEvent: sinon.SinonStub;
   registerEvents: sinon.SinonStub;
   registerScalars: sinon.SinonStub;
@@ -1646,6 +1663,7 @@ export interface Test {
   onMessage: Events['Event'];
   sendMessage: sinon.SinonStub;
   succeed: sinon.SinonStub;
+  withHandlingUserInput: sinon.SinonStub;
 }
 
 export interface Theme {
@@ -1693,6 +1711,7 @@ export type TypesSettingScope =
   | 'incognito_session_only';
 
 export interface Urlbar {
+  EngagementState: UrlbarEngagementState;
   Query: {
     acceptableSources: Urlbar['SourceType'][];
     isPrivate: boolean;
@@ -1702,16 +1721,25 @@ export interface Urlbar {
   Result: {
     payload: {};
     source: Urlbar['SourceType'];
+    suggestedIndex?: number;
     type: Urlbar['ResultType'];
   };
   ResultType: UrlbarResultType;
+  SearchOptions: {
+    focus?: boolean;
+  };
   SourceType: UrlbarSourceType;
+  closeView: sinon.SinonStub;
   contextualTip: UrlbarContextualTip;
   engagementTelemetry: Types['Setting'];
+  focus: sinon.SinonStub;
   onBehaviorRequested: Events['Event'];
+  onEngagement: Events['Event'];
   onQueryCanceled: Events['Event'];
+  onResultPicked: Events['Event'];
   onResultsRequested: Events['Event'];
   openViewOnFocus: Types['Setting'];
+  search: sinon.SinonStub;
 }
 
 export interface UrlbarContextualTip {
@@ -1730,15 +1758,21 @@ export interface UrlbarContextualTip {
   set: sinon.SinonStub;
 }
 
-export type UrlbarResultType = 'remote_tab' | 'search' | 'tab' | 'url';
+export type UrlbarEngagementState =
+  | 'start'
+  | 'engagement'
+  | 'abandonment'
+  | 'discard';
+
+export type UrlbarResultType = 'remote_tab' | 'search' | 'tab' | 'tip' | 'url';
 
 export type UrlbarSourceType =
   | 'bookmarks'
   | 'history'
-  | 'search'
-  | 'tabs'
   | 'local'
-  | 'network';
+  | 'network'
+  | 'search'
+  | 'tabs';
 
 export interface UserScripts {
   RegisteredUserScript: {

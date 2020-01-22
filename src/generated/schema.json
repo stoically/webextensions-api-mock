@@ -134,7 +134,7 @@
                     "favicon_url": {
                       "type": "string",
                       "optional": true,
-                      "format": "url",
+                      "format": "relativeUrl",
                       "preprocess": "localize"
                     },
                     "suggest_url": {
@@ -244,7 +244,8 @@
                           "pref": {
                             "type": "string",
                             "optional": true,
-                            "description": "The preference to retreive the value from."
+                            "description": "The preference to retrieve the value from.",
+                            "preprocess": "localize"
                           },
                           "purpose": {
                             "type": "string",
@@ -495,7 +496,12 @@
         {
           "$extend": "WebExtensionManifest",
           "properties": {
-            "default_locale": { "type": "string", "optional": "true" }
+            "default_locale": { "type": "string", "optional": "true" },
+            "l10n_resources": {
+              "type": "array",
+              "items": { "type": "string" },
+              "optional": true
+            }
           }
         }
       ]
@@ -663,10 +669,26 @@
               "items": { "$ref": "ContentScript" }
             },
             "content_security_policy": {
-              "type": "string",
               "optional": true,
-              "format": "contentSecurityPolicy",
-              "onError": "warn"
+              "onError": "warn",
+              "choices": [
+                { "type": "string", "format": "contentSecurityPolicy" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "extension_pages": {
+                      "type": "string",
+                      "optional": true,
+                      "format": "contentSecurityPolicy"
+                    },
+                    "content_scripts": {
+                      "type": "string",
+                      "optional": true,
+                      "format": "contentSecurityPolicy"
+                    }
+                  }
+                }
+              ]
             },
             "permissions": {
               "type": "array",
@@ -2091,11 +2113,11 @@
           "parameters": [
             {
               "name": "query",
-              "description": "Either a string of words and quoted phrases that are matched against bookmark URLs and titles, or an object. If an object, the properties <code>query</code>, <code>url</code>, and <code>title</code> may be specified and bookmarks matching all specified properties will be produced.",
+              "description": "Either a string of words that are matched against bookmark URLs and titles, or an object. If an object, the properties <code>query</code>, <code>url</code>, and <code>title</code> may be specified and bookmarks matching all specified properties will be produced.",
               "choices": [
                 {
                   "type": "string",
-                  "description": "A string of words and quoted phrases that are matched against bookmark URLs and titles."
+                  "description": "A string of words that are matched against bookmark URLs and titles."
                 },
                 {
                   "type": "object",
@@ -2104,7 +2126,7 @@
                     "query": {
                       "type": "string",
                       "optional": true,
-                      "description": "A string of words and quoted phrases that are matched against bookmark URLs and titles."
+                      "description": "A string of words that are matched against bookmark URLs and titles."
                     },
                     "url": {
                       "type": "string",
@@ -2398,6 +2420,26 @@
             { "$ref": "ColorArray" },
             { "type": "null" }
           ]
+        },
+        {
+          "id": "OnClickData",
+          "type": "object",
+          "description": "Information sent when a browser action is clicked.",
+          "properties": {
+            "modifiers": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["Shift", "Alt", "Command", "Ctrl", "MacCtrl"]
+              },
+              "description": "An array of keyboard modifiers that were held while the menu item was clicked."
+            },
+            "button": {
+              "type": "integer",
+              "optional": true,
+              "description": "An integer value of button by which menu item was clicked."
+            }
+          }
         }
       ],
       "functions": [
@@ -2683,7 +2725,10 @@
           "name": "onClicked",
           "type": "function",
           "description": "Fired when a browser action icon is clicked.  This event will not fire if the browser action has a popup.",
-          "parameters": [{ "name": "tab", "$ref": "tabs.Tab" }]
+          "parameters": [
+            { "name": "tab", "$ref": "tabs.Tab" },
+            { "name": "info", "$ref": "OnClickData", "optional": true }
+          ]
         }
       ]
     }
@@ -2723,6 +2768,10 @@
         "contextMenuShowEvent": {
           "$ref": "types.Setting",
           "description": "Controls after which mouse event context menus popup. This setting's value is of type ContextMenuMouseEvent, which has possible values of <code>mouseup</code> and <code>mousedown</code>."
+        },
+        "ftpProtocolEnabled": {
+          "$ref": "types.Setting",
+          "description": "This boolean setting controls whether the FTP protocol is enabled."
         },
         "homepageOverride": {
           "$ref": "types.Setting",
@@ -3131,6 +3180,12 @@
       "namespace": "captivePortal",
       "description": "This API provides the ability detect the captive portal state of the users connection.",
       "permissions": ["captivePortal"],
+      "properties": {
+        "canonicalURL": {
+          "$ref": "types.Setting",
+          "description": "Return the canonical captive-portal detection URL. Read-only."
+        }
+      },
       "functions": [
         {
           "name": "getState",
@@ -5202,6 +5257,12 @@
                   "description": "Post body.",
                   "optional": true,
                   "type": "string"
+                },
+                "allowHttpErrors": {
+                  "description": "When this flag is set to <code>true</code>, then the browser will allow downloads to proceed after encountering HTTP errors such as <code>404 Not Found</code>.",
+                  "optional": true,
+                  "default": false,
+                  "type": "boolean"
                 }
               }
             },
@@ -6373,7 +6434,10 @@
             "trackopts",
             "jstracer",
             "jsallocations",
-            "preferencereads"
+            "nostacksampling",
+            "nativeallocations",
+            "preferencereads",
+            "ipcmessages"
           ]
         },
         { "id": "supports", "type": "string", "enum": ["windowLength"] }
@@ -8775,6 +8839,26 @@
           "additionalProperties": { "type": "any" },
           "postprocess": "convertImageDataToURL",
           "description": "Pixel data for an image. Must be an ImageData object (for example, from a <code>canvas</code> element)."
+        },
+        {
+          "id": "OnClickData",
+          "type": "object",
+          "description": "Information sent when a page action is clicked.",
+          "properties": {
+            "modifiers": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["Shift", "Alt", "Command", "Ctrl", "MacCtrl"]
+              },
+              "description": "An array of keyboard modifiers that were held while the menu item was clicked."
+            },
+            "button": {
+              "type": "integer",
+              "optional": true,
+              "description": "An integer value of button by which menu item was clicked."
+            }
+          }
         }
       ],
       "functions": [
@@ -8992,7 +9076,10 @@
           "name": "onClicked",
           "type": "function",
           "description": "Fired when a page action icon is clicked.  This event will not fire if the page action has a popup.",
-          "parameters": [{ "name": "tab", "$ref": "tabs.Tab" }]
+          "parameters": [
+            { "name": "tab", "$ref": "tabs.Tab" },
+            { "name": "info", "$ref": "OnClickData", "optional": true }
+          ]
         }
       ]
     }
@@ -9172,6 +9259,25 @@
             "proxy_only"
           ],
           "description": "The IP handling policy of WebRTC."
+        },
+        {
+          "id": "tlsVersionRestrictionConfig",
+          "type": "object",
+          "description": "An object which describes TLS minimum and maximum versions.",
+          "properties": {
+            "minimum": {
+              "type": "string",
+              "enum": ["TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "unknown"],
+              "optional": true,
+              "description": "The minimum TLS version supported."
+            },
+            "maximum": {
+              "type": "string",
+              "enum": ["TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3", "unknown"],
+              "optional": true,
+              "description": "The maximum TLS version supported."
+            }
+          }
         }
       ],
       "properties": {
@@ -9186,6 +9292,10 @@
         "webRTCIPHandlingPolicy": {
           "$ref": "types.Setting",
           "description": "Allow users to specify the media performance/privacy tradeoffs which impacts how WebRTC traffic will be routed and how much local address information is exposed. This preference's value is of type IPHandlingPolicy, defaulting to <code>default</code>."
+        },
+        "tlsVersionRestriction": {
+          "$ref": "types.Setting",
+          "description": "This property controls the minimum and maximum TLS versions. This setting's value is an object of $(ref:tlsVersionRestrictionConfig)."
         }
       }
     }
@@ -9282,7 +9392,7 @@
   "proxy": [
     {
       "namespace": "proxy",
-      "description": "Use the browser.proxy API to register proxy scripts in Firefox. Proxy scripts in Firefox are proxy auto-config files with extra contextual information and support for additional return types.",
+      "description": "Provides access to global proxy settings for Firefox and proxy event listeners to handle dynamic proxy implementations.",
       "permissions": ["proxy"],
       "types": [
         {
@@ -9347,6 +9457,12 @@
               "type": "boolean",
               "optional": true,
               "description": "Proxy DNS when using SOCKS v5."
+            },
+            "respectBeConservative": {
+              "type": "boolean",
+              "optional": true,
+              "default": true,
+              "description": " If true (the default value), do not use newer TLS protocol features that might have interoperability problems on the Internet. This is intended only for use with critical infrastructure like the updates, and is only available to privileged addons."
             }
           }
         }
@@ -9357,36 +9473,6 @@
           "description": "Configures proxy settings. This setting's value is an object of type ProxyConfig."
         }
       },
-      "functions": [
-        {
-          "name": "register",
-          "type": "function",
-          "deprecated": "proxy.register has been deprecated and will be removed in Firefox 71.",
-          "description": "Registers the proxy script for the extension.",
-          "async": true,
-          "parameters": [
-            { "name": "url", "type": "string", "format": "strictRelativeUrl" }
-          ]
-        },
-        {
-          "name": "unregister",
-          "type": "function",
-          "deprecated": "proxy.unregister has been deprecated and will be removed in Firefox 71.",
-          "description": "Unregisters the proxy script for the extension.",
-          "async": true,
-          "parameters": []
-        },
-        {
-          "name": "registerProxyScript",
-          "type": "function",
-          "deprecated": "proxy.registerProxyScript has been deprecated and will be removed in Firefox 71.",
-          "description": "Registers the proxy script for the extension. This is an alias for proxy.register.",
-          "async": true,
-          "parameters": [
-            { "name": "url", "type": "string", "format": "strictRelativeUrl" }
-          ]
-        }
-      ],
       "events": [
         {
           "name": "onRequest",
@@ -9446,11 +9532,6 @@
                   "type": "number",
                   "description": "The time when this signal is triggered, in milliseconds since the epoch."
                 },
-                "ip": {
-                  "type": "string",
-                  "optional": true,
-                  "description": "The server IP address that the request was actually sent to. Note that it may be a literal IPv6 address."
-                },
                 "fromCache": {
                   "type": "boolean",
                   "description": "Indicates if this response was fetched from disk cache."
@@ -9459,6 +9540,14 @@
                   "$ref": "webRequest.HttpHeaders",
                   "optional": true,
                   "description": "The HTTP request headers that are going to be sent out with this request."
+                },
+                "urlClassification": {
+                  "$ref": "webRequest.UrlClassification",
+                  "description": "Url classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -9483,13 +9572,6 @@
           "type": "function",
           "description": "Notifies about errors caused by the invalid use of the proxy API.",
           "parameters": [{ "name": "error", "type": "object" }]
-        },
-        {
-          "name": "onProxyError",
-          "type": "function",
-          "deprecated": "proxy.onProxyError has been deprecated and will be removed in Firefox 71. Use proxy.onError instead.",
-          "description": "Please use $(ref:proxy.onError).",
-          "parameters": [{ "name": "error", "type": "object" }]
         }
       ]
     }
@@ -9497,7 +9579,7 @@
   "runtime": [
     {
       "namespace": "runtime",
-      "allowedContexts": ["content", "devtools", "proxy"],
+      "allowedContexts": ["content", "devtools"],
       "description": "Use the <code>browser.runtime</code> API to retrieve the background page, return details about the manifest, and listen for and respond to events in the app or extension lifecycle. You can also use this API to convert the relative path of URLs to fully-qualified URLs.",
       "types": [
         {
@@ -9846,7 +9928,7 @@
           "name": "sendMessage",
           "type": "function",
           "allowAmbiguousOptionalArguments": true,
-          "allowedContexts": ["content", "devtools", "proxy"],
+          "allowedContexts": ["content", "devtools"],
           "description": "Sends a single message to event listeners within your extension/app or a different extension/app. Similar to $(ref:runtime.connect) but only sends a single message, with an optional response. If sending to your extension, the $(ref:runtime.onMessage) event will be fired in each page, or $(ref:runtime.onMessageExternal), if a different extension. Note that extensions cannot send messages to content scripts using this method. To send messages to content scripts, use $(ref:tabs.sendMessage).",
           "async": "responseCallback",
           "parameters": [
@@ -9866,11 +9948,6 @@
                   "optional": true,
                   "unsupported": true,
                   "description": "Whether the TLS channel ID will be passed into onMessageExternal for processes that are listening for the connection event."
-                },
-                "toProxyScript": {
-                  "type": "boolean",
-                  "optional": true,
-                  "description": "If true, the message will be directed to the extension's proxy sandbox."
                 }
               },
               "optional": true
@@ -10065,7 +10142,7 @@
         {
           "name": "onMessage",
           "type": "function",
-          "allowedContexts": ["content", "devtools", "proxy"],
+          "allowedContexts": ["content", "devtools"],
           "description": "Fired when a message is sent from either an extension process or a content script.",
           "parameters": [
             {
@@ -11338,7 +11415,6 @@
             "discarded",
             "favIconUrl",
             "hidden",
-            "isarticle",
             "isArticle",
             "mutedInfo",
             "pinned",
@@ -13005,6 +13081,70 @@
           ]
         },
         {
+          "name": "keyedScalarAdd",
+          "type": "function",
+          "description": "Adds the value to the given keyed scalar.",
+          "async": true,
+          "parameters": [
+            {
+              "name": "name",
+              "type": "string",
+              "description": "The scalar name"
+            },
+            { "name": "key", "type": "string", "description": "The key name" },
+            {
+              "name": "value",
+              "type": "integer",
+              "minimum": 1,
+              "description": "The numeric value to add to the scalar. Only unsigned integers supported."
+            }
+          ]
+        },
+        {
+          "name": "keyedScalarSet",
+          "type": "function",
+          "description": "Sets the keyed scalar to the given value. Throws if the value type doesn't match the scalar type.",
+          "async": true,
+          "parameters": [
+            {
+              "name": "name",
+              "type": "string",
+              "description": "The scalar name."
+            },
+            { "name": "key", "type": "string", "description": "The key name." },
+            {
+              "name": "value",
+              "description": "The value to set the scalar to.",
+              "choices": [
+                { "type": "string" },
+                { "type": "boolean" },
+                { "type": "integer" },
+                { "type": "object", "additionalProperties": { "type": "any" } }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "keyedScalarSetMaximum",
+          "type": "function",
+          "description": "Sets the keyed scalar to the maximum of the current and the passed value",
+          "async": true,
+          "parameters": [
+            {
+              "name": "name",
+              "type": "string",
+              "description": "The scalar name."
+            },
+            { "name": "key", "type": "string", "description": "The key name." },
+            {
+              "name": "value",
+              "type": "integer",
+              "minimum": 0,
+              "description": "The numeric value to set the scalar to. Only unsigned integers supported."
+            }
+          ]
+        },
+        {
           "name": "recordEvent",
           "type": "function",
           "description": "Record an event in Telemetry. Throws when trying to record an unknown event.",
@@ -13106,6 +13246,12 @@
       "defaultContexts": ["content", "devtools"],
       "description": "none",
       "functions": [
+        {
+          "name": "withHandlingUserInput",
+          "type": "function",
+          "description": "Calls the callback function wrapped with user input set.  This is only used for internal unit testing.",
+          "parameters": [{ "type": "function", "name": "callback" }]
+        },
         {
           "name": "notifyFail",
           "type": "function",
@@ -13623,7 +13769,6 @@
               "name": "onChange",
               "type": "function",
               "description": "Fired after the setting changes.",
-              "unsupported": true,
               "parameters": [
                 {
                   "type": "object",
@@ -13657,6 +13802,12 @@
       "description": "Use the <code>browser.urlbar</code> API to experiment with new features in the URLBar. Restricted to Mozilla privileged WebExtensions.",
       "permissions": ["urlbar"],
       "types": [
+        {
+          "id": "EngagementState",
+          "type": "string",
+          "enum": ["start", "engagement", "abandonment", "discard"],
+          "description": "The state of an engagement made with the urlbar by the user. <code>start</code>: The user has started an engagement. <code>engagement</code>: The user has completed an engagement by picking a result. <code>abandonment</code>: The user has abandoned their engagement, for example by blurring the urlbar. <code>discard</code>: The engagement ended in a way that should be ignored by listeners."
+        },
         {
           "id": "Query",
           "type": "object",
@@ -13697,14 +13848,33 @@
             "type": {
               "$ref": "ResultType",
               "description": "The result's type."
+            },
+            "suggestedIndex": {
+              "type": "integer",
+              "description": "Suggest a preferred position for this result within the result set.",
+              "optional": true,
+              "default": -1
             }
           }
         },
         {
           "id": "ResultType",
           "type": "string",
-          "enum": ["remote_tab", "search", "tab", "url"],
-          "description": "Possible types of results. <code>remote_tab</code>: A synced tab from another device. <code>search</code>: A search suggestion from a search engine. <code>tab</code>: An open tab in the browser. <code>url</code>: A URL that's not one of the other types."
+          "enum": ["remote_tab", "search", "tab", "tip", "url"],
+          "description": "Possible types of results. <code>remote_tab</code>: A synced tab from another device. <code>search</code>: A search suggestion from a search engine. <code>tab</code>: An open tab in the browser. <code>tip</code>: An actionable message to help the user with their query. <code>url</code>: A URL that's not one of the other types."
+        },
+        {
+          "id": "SearchOptions",
+          "type": "object",
+          "description": "Options to the <code>search</code> function.",
+          "properties": {
+            "focus": {
+              "type": "boolean",
+              "optional": true,
+              "default": true,
+              "description": "Whether to focus the input field and select its contents."
+            }
+          }
         },
         {
           "id": "SourceType",
@@ -13712,12 +13882,12 @@
           "enum": [
             "bookmarks",
             "history",
-            "search",
-            "tabs",
             "local",
-            "network"
+            "network",
+            "search",
+            "tabs"
           ],
-          "description": "Possible sources of results. <code>bookmarks</code>: The result comes from the user's bookmarks. <code>history</code>: The result comes from the user's history. <code>search</code>: The result comes from a search engine. <code>tabs</code>: The result is an open tab in the browser or a synced tab from another device. "
+          "description": "Possible sources of results. <code>bookmarks</code>: The result comes from the user's bookmarks. <code>history</code>: The result comes from the user's history. <code>local</code>: The result comes from some local source not covered by another source type. <code>network</code>: The result comes from some network source not covered by another source type. <code>search</code>: The result comes from a search engine. <code>tabs</code>: The result is an open tab in the browser or a synced tab from another device."
         }
       ],
       "properties": {
@@ -13730,6 +13900,50 @@
           "description": "Enables or disables the engagement telemetry."
         }
       },
+      "functions": [
+        {
+          "name": "closeView",
+          "type": "function",
+          "async": true,
+          "description": "Closes the urlbar view in the current window.",
+          "parameters": []
+        },
+        {
+          "name": "focus",
+          "type": "function",
+          "async": true,
+          "description": "Focuses the urlbar in the current window.",
+          "parameters": [
+            {
+              "name": "select",
+              "type": "boolean",
+              "optional": true,
+              "default": false,
+              "description": "If true, the text in the urlbar will also be selected."
+            }
+          ]
+        },
+        {
+          "name": "search",
+          "type": "function",
+          "async": true,
+          "description": "Starts a search in the urlbar in the current window.",
+          "parameters": [
+            {
+              "name": "searchString",
+              "type": "string",
+              "description": "The search string."
+            },
+            {
+              "name": "options",
+              "$ref": "SearchOptions",
+              "optional": true,
+              "default": {},
+              "description": "Options for the search."
+            }
+          ]
+        }
+      ],
       "events": [
         {
           "name": "onBehaviorRequested",
@@ -13755,6 +13969,26 @@
             "enum": ["active", "inactive", "restricting"],
             "description": "The behavior of the provider for the query."
           }
+        },
+        {
+          "name": "onEngagement",
+          "type": "function",
+          "description": "This event is fired when the user starts and ends an engagement with the urlbar.",
+          "parameters": [
+            {
+              "name": "state",
+              "$ref": "EngagementState",
+              "description": "The state of the engagement."
+            }
+          ],
+          "extraParameters": [
+            {
+              "name": "providerName",
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "description": "The name of the provider that will listen for engagement events."
+            }
+          ]
         },
         {
           "name": "onQueryCanceled",
@@ -13800,6 +14034,26 @@
             "items": { "$ref": "Result" },
             "description": "The results that the provider fetched for the query."
           }
+        },
+        {
+          "name": "onResultPicked",
+          "type": "function",
+          "description": "Typically, a provider includes a <code>url</code> property in its results' payloads. When the user picks a result with a URL, Firefox automatically loads the URL. URLs don't make sense for every result type, however. When the user picks a result without a URL, this event is fired. The provider should take an appropriate action in response. Currently the only applicable <code>ResultType</code> is <code>tip</code>.",
+          "parameters": [
+            {
+              "name": "payload",
+              "type": "object",
+              "description": "The payload of the result that was picked."
+            }
+          ],
+          "extraParameters": [
+            {
+              "name": "providerName",
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9_-]+$",
+              "description": "The listener will be called for the results of the provider with this name."
+            }
+          ]
         }
       ]
     }
@@ -14965,11 +15219,11 @@
           "properties": {
             "firstParty": {
               "$ref": "UrlClassificationParty",
-              "description": "First party classification flags if the request has been classified."
+              "description": "Classification flags if the request has been classified and it is first party."
             },
             "thirdParty": {
               "$ref": "UrlClassificationParty",
-              "description": "Third party classification flags if the request has been classified."
+              "description": "Classification flags if the request has been classified and it or its window hierarchy is third party."
             }
           }
         }
@@ -15119,6 +15373,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15210,6 +15468,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15301,6 +15563,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15395,6 +15661,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15515,6 +15785,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             },
@@ -15629,6 +15903,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15736,6 +16014,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
@@ -15838,6 +16120,18 @@
                 "urlClassification": {
                   "$ref": "UrlClassification",
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
+                },
+                "requestSize": {
+                  "type": "integer",
+                  "description": "For http requests, the bytes transferred in the request. Only available in onCompleted."
+                },
+                "responseSize": {
+                  "type": "integer",
+                  "description": "For http requests, the bytes received in the request. Only available in onCompleted."
                 }
               }
             }
@@ -15932,6 +16226,10 @@
                   "$ref": "UrlClassification",
                   "optional": true,
                   "description": "Tracking classification if the request has been classified."
+                },
+                "thirdParty": {
+                  "type": "boolean",
+                  "description": "Indicates if this request and its content window hierarchy is third party."
                 }
               }
             }
