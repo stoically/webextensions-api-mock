@@ -1,5 +1,9 @@
 import assert from 'assert';
 import webExtensionsApiMock from '../src';
+import chai from 'chai';
+import sinonChai from 'sinon-chai';
+chai.should();
+chai.use(sinonChai);
 
 describe('WebExtensionsApiMock', () => {
   it('should return a browser stub', async () => {
@@ -20,6 +24,14 @@ describe('WebExtensionsApiMock', () => {
 
     assert(typeof browser.runtime.connect().postMessage === 'function');
     assert(typeof browser.runtime.connect().disconnect === 'function');
+  });
+
+  it('should not reuse sinon stubs', () => {
+    const browser = webExtensionsApiMock();
+
+    browser.runtime.connect().disconnect();
+    browser.runtime.connect().disconnect.should.have.been.called;
+    browser.runtime.connectNative().disconnect.should.not.have.been.called;
   });
 
   it('should expose the sinon sandbox', async () => {
