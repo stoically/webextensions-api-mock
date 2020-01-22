@@ -81,6 +81,10 @@ export class NamespacesSchemaWalker implements SchemaWalkerDelegate {
     return `{\n${fields}\n}`;
   }
 
+  valueForInvalidRef(): SchemaWalkerValue {
+    return 'any';
+  }
+
   valueForCircularType(schemaId: SchemaId): SchemaWalkerValue {
     return Utils.typeIdWithSchemaId(schemaId).fullName;
   }
